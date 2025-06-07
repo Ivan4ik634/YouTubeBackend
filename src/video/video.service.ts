@@ -39,13 +39,17 @@ export class VideoService {
     const user = await this.user.findOne({ username: param.userName });
     if (!user) return 'Такого юзера не має!';
     const videos = (await this.video
-      .find({ userId: String(user._id) })
+      .find({ isHidden: false, userId: String(user._id) })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
       .populate('userId')) as any;
 
-    return videos;
+    return videos.filter((obj) => {
+      return (
+        obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all'
+      );
+    });
   }
 
   async findAll(query: QueryFindAll) {
@@ -78,10 +82,13 @@ export class VideoService {
     const video = await this.video
       .findOne({ _id: id })
       .populate<{ userId: User }>('userId');
+    const userId = await this.jwt.verify(bearer, { secret: 'secret' });
+    const isVideoUser = userId === video?.userId.toString();
     if (!video) return 'Video not found';
-    if (video.userId.hidden) return 'Video not found';
-    if (video.isHidden) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting') return 'Video not found';
+    if (video.userId.hidden && !isVideoUser) return 'Video not found';
+    if (video.isHidden && !isVideoUser) return 'Video not found';
+    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser)
+      return 'Video not found';
 
     if (bearer) {
       const userId = await this.jwt.verify(bearer, { secret: 'secret' });
