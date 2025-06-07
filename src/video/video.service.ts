@@ -44,12 +44,15 @@ export class VideoService {
       .limit(limit)
       .sort({ createdAt: -1 })
       .populate('userId')) as any;
-
-    return videos.filter((obj) => {
-      return (
-        obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all'
-      );
-    });
+    console.log(videos);
+    return videos.length !== 0
+      ? videos.filter((obj) => {
+          return (
+            obj.userId.hidden === false ||
+            obj.userId.isVisibilityVideo === 'all'
+          );
+        })
+      : [];
   }
 
   async findAll(query: QueryFindAll) {
@@ -70,8 +73,8 @@ export class VideoService {
       .skip(skip)
       .limit(limit)
       .populate<{ userId: User }>('userId');
-
-    return videos.length > 0
+    console.log(videos);
+    return videos.length !== 0
       ? videos.filter((obj) => {
           return (
             obj.userId.hidden === false ||
@@ -144,8 +147,8 @@ export class VideoService {
       })
       .limit(5)
       .populate<{ userId: User }>('userId');
-
-    return videos.length > 0
+    console.log(videos);
+    return videos.length !== 0
       ? videos.filter((obj) => {
           return (
             obj.userId.hidden === false ||
