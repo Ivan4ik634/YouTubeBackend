@@ -73,7 +73,7 @@ export class UserService {
           { _id: userUserName._id },
           { secret: 'secret', expiresIn: '1h' },
         );
-        const link = `<a href=http://localhost:3000/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
+        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
         const textEmail = `Дякумо за повернення до нашої платформи! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
         await this.email.sendEmail(
           userUserName.email,
@@ -100,7 +100,7 @@ export class UserService {
           { _id: userEmail._id },
           { secret: 'secret', expiresIn: '1h' },
         );
-        const link = `<a href=http://localhost:3000/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
+        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
         const textEmail = `Дякумо за повернення до нашої платформи! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
         await this.email.sendEmail(
           userEmail.email,
