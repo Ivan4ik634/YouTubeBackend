@@ -221,15 +221,23 @@ export class VideoService {
     }
   }
   async hiddenVideo(videoId: string, userId: string) {
+    const user = await this.user.findOne({ _id: userId });
     const video = await this.video.findOne({ _id: videoId });
     if (!video) return 'Video not found';
+    if (!user) return 'User not found';
     if (String(video.userId) !== userId) return 'You no can hidden this video';
     video.isHidden = !video.isHidden;
+    user.videos = video.isHidden ? user.videos - 1 : user.videos + 1;
     await this.video.updateOne(
       { _id: video._id },
       { isHidden: !video.isHidden },
     );
+    await this.user.updateOne(
+      { _id: user._id },
+      { $inc: { videos: video.isHidden ? -1 : 1 } },
+    );
     await video.save();
+    await user.save();
     return `You video ${video.isHidden ? 'hidden' : 'unhidden'}!`;
   }
   async blockVideo(videoId: string) {
