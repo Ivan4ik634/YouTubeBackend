@@ -87,9 +87,9 @@ export class VideoService {
   async findOne(id: string, bearer: string) {
     const video = await this.video
       .findOne({ _id: id })
-      .populate<{ userId: User }>('userId');
+      .populate<{ userId: User & { _id: string } }>('userId');
     const userId = await this.jwt.verify(bearer, { secret: 'secret' });
-    const isVideoUser = userId === video?.userId.toString();
+    const isVideoUser = userId === video?.userId._id.toString();
     if (!video) return 'Video not found';
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
     if (video.isHidden && !isVideoUser) return 'Video not found';
