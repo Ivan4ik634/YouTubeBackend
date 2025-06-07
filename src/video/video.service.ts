@@ -88,7 +88,9 @@ export class VideoService {
     const video = await this.video
       .findOne({ _id: id })
       .populate<{ userId: User & { _id: string } }>('userId');
-    const userId = await this.jwt.verify(bearer, { secret: 'secret' });
+    const userId = bearer
+      ? await this.jwt.verify(bearer, { secret: 'secret' })
+      : '';
     const isVideoUser = userId === video?.userId._id.toString();
     console.log(video);
     if (!video) return 'Video not found';
