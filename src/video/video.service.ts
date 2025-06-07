@@ -71,11 +71,14 @@ export class VideoService {
       .limit(limit)
       .populate<{ userId: User }>('userId');
 
-    return videos.filter((obj) => {
-      return (
-        obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all'
-      );
-    });
+    return videos.length > 0
+      ? videos.filter((obj) => {
+          return (
+            obj.userId.hidden === false ||
+            obj.userId.isVisibilityVideo === 'all'
+          );
+        })
+      : [];
   }
 
   async findOne(id: string, bearer: string) {
@@ -141,11 +144,15 @@ export class VideoService {
       })
       .limit(5)
       .populate<{ userId: User }>('userId');
-    return videos.filter((obj) => {
-      return (
-        obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all'
-      );
-    });
+
+    return videos.length > 0
+      ? videos.filter((obj) => {
+          return (
+            obj.userId.hidden === false ||
+            obj.userId.isVisibilityVideo === 'all'
+          );
+        })
+      : [];
   }
   async updateVideo(dto: UpdateVideo, userId: string) {
     const video = await this.video.findOne({ _id: dto.videoId });
