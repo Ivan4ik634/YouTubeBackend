@@ -90,7 +90,14 @@ export class VideoService {
       .populate<{ userId: User & { _id: string } }>('userId');
     const userId = await this.jwt.verify(bearer, { secret: 'secret' });
     const isVideoUser = userId === video?.userId._id.toString();
+    console.log(video);
     if (!video) return 'Video not found';
+    console.log(
+      video.userId.hidden,
+      video.isHidden,
+      isVideoUser,
+      video?.userId.isVisibilityVideo,
+    );
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
     if (video.isHidden && !isVideoUser) return 'Video not found';
     if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser)
