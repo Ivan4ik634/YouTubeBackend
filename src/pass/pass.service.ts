@@ -36,9 +36,7 @@ export class PassService {
     const codeUser = await this.code
       .findOne({ user: user._id })
       .sort({ createdAt: -1 });
-    console.log(codeUser);
-    if (!codeUser) return;
-    if (codeUser[0].code !== body.code) return { message: 'Incorrect code' };
+    if (!codeUser) return { message: 'Incorrect code' };
     if (codeUser[0].createdAt.getTime() < Date.now() - 10 * 60 * 1000) {
       await this.code.deleteMany({ user: user._id });
       return { message: 'The code has timed out' };
