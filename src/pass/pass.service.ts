@@ -33,7 +33,9 @@ export class PassService {
     const user = await this.user.findOne({ email: body.email });
     console.log(user);
     if (!user) return;
-    const codeUser = await this.code.find({ code: body.code });
+    const codeUser = await this.code
+      .find({ code: body.code, user: user._id })
+      .sort({ createdAt: -1 });
     console.log(codeUser);
     if (!codeUser) return { message: 'Incorrect code' };
     if (codeUser[0].createdAt.getTime() < Date.now() - 10 * 60 * 1000) {
