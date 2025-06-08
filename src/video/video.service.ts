@@ -32,7 +32,10 @@ export class VideoService {
     private readonly jwt: JwtService,
   ) {}
 
-  async findByProfile(query: QueryFindAll, param: { userName: string }) {
+  async findVideoByUserProfile(
+    query: QueryFindAll,
+    param: { userName: string },
+  ) {
     const limit = query.limit || 10;
     const page = query.page || 1;
     const skip = (page - 1) * limit;
@@ -54,7 +57,18 @@ export class VideoService {
         })
       : [];
   }
-
+  async findVideoByProfile(query: QueryFindAll, userId: string) {
+    const limit = query.limit || 10;
+    const page = query.page || 1;
+    const skip = (page - 1) * limit;
+    const videos = (await this.video
+      .find({ userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .populate('userId')) as any;
+    return videos.length !== 0 ? videos : [];
+  }
   async findAll(query: QueryFindAll) {
     const limit = Number(query.limit) || 10;
     const page = query.page || 1;

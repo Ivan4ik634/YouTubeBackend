@@ -79,11 +79,19 @@ export class VideoController {
     await this.videoService.blockVideo(Body.videoId);
   }
   @Get('/profile/:userName')
-  async findByProfile(
+  async findVideoByUserProfile(
     @Query() query: QueryFindAll,
     @Param() param: { userName: string },
   ) {
-    return this.videoService.findByProfile(query, param);
+    return this.videoService.findVideoByUserProfile(query, param);
+  }
+  @Get('/profile')
+  @UseGuards(AuthGuard)
+  async findVideoByProfile(
+    @Query() query: QueryFindAll,
+    @CurrectUser() userId: string,
+  ) {
+    return this.videoService.findVideoByProfile(query, userId);
   }
 
   @Post('playlist')
