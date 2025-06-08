@@ -9,7 +9,7 @@ import { createEncryptor } from 'simple-encryptor';
 
 @Injectable()
 export class TotpService {
-  secret = '912939qiwieiiqutuquasjdjaj1123';
+  secret = process.env.SECRET_KEY_ENCRYPTOR!;
   myEncryptor = createEncryptor(this.secret);
   constructor(@InjectModel(User.name) private user: Model<User>) {}
 
