@@ -5,13 +5,12 @@ import { Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { EmailService } from 'src/email/email.service';
-import { Subscribe } from 'src/schemes/Subscribes.schema';
 import { NotificationService } from 'src/notification/notification.service';
 import { TotpService } from 'src/totp/totp.service';
 import { Video } from 'src/schemes/Video.schema';
 import { QueryFindAll } from 'src/common/dto/queryFindAll';
 import { Setting } from 'src/schemes/Setting.schema';
-
+import * as bcryptjs from 'bcryptjs';
 @Injectable()
 export class UserService {
   constructor(
@@ -25,7 +24,6 @@ export class UserService {
     private readonly totp: TotpService,
   ) {}
   async register(dto: RegisterDto) {
-    console.log(dto);
     const user = await this.user.findOne({
       username: dto.username,
     });
@@ -37,13 +35,15 @@ export class UserService {
         message: 'Пользователь с таким именем или почтой уже существует',
       };
 
-    const newUser = await this.user.create(dto);
+    const salt = await bcryptjs.genSalt(10);
+    const hashed = await bcryptjs.hash(dto.password, salt);
+    const newUser = await this.user.create({ ...dto, password: hashed });
     await this.setting.create({ userId: String(newUser._id) });
     const emailVerifyToken = await this.jwt.signAsync(
       { _id: newUser._id },
       { secret: 'secret', expiresIn: '1h' },
     );
-    const link = `<a href=http://localhost:3000/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
+    const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
     const textEmail = `Дякумо за регистрацию! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
     await this.email.sendEmail(
       newUser.email,
@@ -57,8 +57,13 @@ export class UserService {
   async login(dto: LoginDto) {
     const userEmail = await this.user.findOne({ email: dto.username });
     const userUserName = await this.user.findOne({ username: dto.username });
+
     if (!userEmail && userUserName) {
-      if (dto.password === userUserName.password) {
+      const isValidPassword = await bcryptjs.compare(
+        dto.password,
+        userUserName.password,
+      );
+      if (isValidPassword) {
         if (userUserName.isEnabledTotp) {
           if (!dto.code)
             return { message: 'Нужно пройти 2FA проверку через TOTP' };
@@ -85,7 +90,11 @@ export class UserService {
       }
     }
     if (userEmail && !userUserName) {
-      if (dto.password === userEmail.password) {
+      const isValidPassword = await bcryptjs.compare(
+        dto.password,
+        userEmail.password,
+      );
+      if (isValidPassword) {
         if (userEmail.isEnabledTotp) {
           if (!dto.code)
             return { message: 'Нужно пройти 2FA проверку через TOTP' };

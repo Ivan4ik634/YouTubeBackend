@@ -5,9 +5,12 @@ import { User } from 'src/schemes/User.schema';
 
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
+import { createEncryptor } from 'simple-encryptor';
 
 @Injectable()
 export class TotpService {
+  secret = '912939qiwieiiqutuquasjdjaj1123';
+  myEncryptor = createEncryptor(this.secret);
   constructor(@InjectModel(User.name) private user: Model<User>) {}
 
   async generateSecret(userId: string) {
@@ -18,7 +21,7 @@ export class TotpService {
     });
 
     await this.user.findByIdAndUpdate(userId, {
-      codeTotp: secret.base32,
+      codeTotp: this.myEncryptor.encrypt(secret.base32),
       isEnabledTotp: false,
     });
     const qrCode = await qrcode.toDataURL(secret.otpauth_url!);
@@ -36,7 +39,7 @@ export class TotpService {
     }
 
     const verified = speakeasy.totp.verify({
-      secret: userData.codeTotp,
+      secret: this.myEncryptor.decrypt(userData.codeTotp),
       encoding: 'base32',
       token,
     });
@@ -48,7 +51,8 @@ export class TotpService {
     if (!userData) throw new Error('Secret not generated');
 
     const verified = speakeasy.totp.verify({
-      secret: userData.codeTotp,
+      secret: this.myEncryptor.decrypt(userData.codeTotp),
+
       encoding: 'base32',
       token,
     });
