@@ -29,19 +29,20 @@ export class PassService {
     return 'На емайле появилось письмо проверте !';
   }
   async verefyPass(body: VerifyPass) {
+    console.log(body);
     const user = await this.user.findOne({ email: body.email });
     if (!user) return;
     const codeUser = await this.code
       .findOne({ user: user._id })
       .sort({ createdAt: -1 });
     if (!codeUser) return;
-    if (codeUser[0].code !== body.code) return 'Неправильний код';
+    if (codeUser[0].code !== body.code) return { message: 'Incorrect code' };
     if (codeUser[0].createdAt.getTime() < Date.now() - 10 * 60 * 1000) {
       await this.code.deleteMany({ user: user._id });
-      return 'Время кода истекло';
+      return { message: 'The code has timed out' };
     }
     if (body.password !== body.refreshPassword)
-      return { message: 'Пароли не совпадают' };
+      return { message: 'Passwords do not match' };
 
     await this.user.updateOne({ _id: user._id }, { password: body.password });
     await this.code.deleteMany({ user: user._id });

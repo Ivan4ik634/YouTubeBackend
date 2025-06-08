@@ -13,6 +13,7 @@ export class PassController {
 
   @Post('/verify')
   async verifyReset(@Body() body: VerifyPass) {
+    console.log(body);
     return this.passService.verefyPass(body);
   }
 }

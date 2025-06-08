@@ -203,7 +203,7 @@ export class UserService {
     if (!user) return 'Такого пользователя не существует';
     const isBlock = await this.user.findOne({
       user: userId,
-      blocked: dto,
+      blocedUsers: { $in: user._id },
     });
     if (isBlock) {
       user.blocedUsers = user.blocedUsers.filter((id) =>
