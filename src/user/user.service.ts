@@ -32,7 +32,7 @@ export class UserService {
     });
     if (user || userEmail)
       return {
-        message: 'Пользователь с таким именем или почтой уже существует',
+        message: 'A user with this name or email already exists',
       };
 
     const salt = await bcryptjs.genSalt(10);
@@ -43,16 +43,16 @@ export class UserService {
       { _id: newUser._id },
       { secret: 'secret', expiresIn: '1h' },
     );
-    const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
-    const textEmail = `Дякумо за регистрацию! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
+    const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
+    const textEmail = `Thank you for registering! To activate your account, confirm your email using this link ${link}`;
     await this.email.sendEmail(
       newUser.email,
-      'Подтверждение почты',
+      'Mail confirmation',
       textEmail,
       textEmail,
     );
 
-    return { message: 'На емайле появилось письмо проверте !' };
+    return { message: 'A letter has appeared in the mail, check it!' };
   }
   async login(dto: LoginDto) {
     const userEmail = await this.user.findOne({ email: dto.username });
@@ -66,27 +66,27 @@ export class UserService {
       if (isValidPassword) {
         if (userUserName.isEnabledTotp) {
           if (!dto.code)
-            return { message: 'Нужно пройти 2FA проверку через TOTP' };
+            return { message: 'You need to pass 2FA verification via TOTP' };
           if (
             (await this.totp.verify2FA(String(userUserName._id), dto.code)) ===
             false
           )
-            return { message: 'Неправильный код TOTP' };
+            return { message: 'Invalid TOTP code' };
         }
 
         const emailVerifyToken = await this.jwt.signAsync(
           { _id: userUserName._id },
           { secret: 'secret', expiresIn: '1h' },
         );
-        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
-        const textEmail = `Дякумо за повернення до нашої платформи! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
+        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
+        const textEmail = `Thank you for returning to our platform! To activate your account, confirm your email using this link ${link}`;
         await this.email.sendEmail(
           userUserName.email,
-          'Подтверждение почты',
+          'Mail confirmation',
           textEmail,
           textEmail,
         );
-        return { message: 'На емайле появилось письмо проверте !' };
+        return { message: 'A letter has appeared in the mail, check it!' };
       }
     }
     if (userEmail && !userUserName) {
@@ -97,31 +97,31 @@ export class UserService {
       if (isValidPassword) {
         if (userEmail.isEnabledTotp) {
           if (!dto.code)
-            return { message: 'Нужно пройти 2FA проверку через TOTP' };
+            return { message: 'You need to pass 2FA verification via TOTP' };
           if (
             (await this.totp.verify2FA(String(userEmail._id), dto.code)) ===
             false
           )
-            return { message: 'Неправильный код TOTP' };
+            return { message: 'Invalid TOTP code' };
         }
 
         const emailVerifyToken = await this.jwt.signAsync(
           { _id: userEmail._id },
           { secret: 'secret', expiresIn: '1h' },
         );
-        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Подтвердить почту</a>`;
-        const textEmail = `Дякумо за повернення до нашої платформи! Для активации аккаунта потвердіть свою пошту по цьому посиланню ${link}`;
+        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
+        const textEmail = `Thank you for returning to our platform! To activate your account, confirm your email using this link ${link}`;
         await this.email.sendEmail(
           userEmail.email,
-          'Подтверждение почты',
+          'Mail confirmation',
           textEmail,
           textEmail,
         );
-        return { message: 'На емайле появилось письмо проверте !' };
+        return { message: 'A letter has appeared in the mail, check it!' };
       }
     }
 
-    return { message: 'Неправильный логин или пароль' };
+    return { message: 'Incorrect login or password' };
   }
   async verifyEmail(token: string) {
     const user = await this.jwt.verify(token, { secret: 'secret' });
