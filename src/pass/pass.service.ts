@@ -31,10 +31,12 @@ export class PassService {
   async verefyPass(body: VerifyPass) {
     console.log(body);
     const user = await this.user.findOne({ email: body.email });
+    console.log(user);
     if (!user) return;
     const codeUser = await this.code
       .findOne({ user: user._id })
       .sort({ createdAt: -1 });
+    console.log(codeUser);
     if (!codeUser) return;
     if (codeUser[0].code !== body.code) return { message: 'Incorrect code' };
     if (codeUser[0].createdAt.getTime() < Date.now() - 10 * 60 * 1000) {
