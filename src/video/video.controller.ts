@@ -65,6 +65,14 @@ export class VideoController {
   async likeVideo(@Body() Body: LikeVideo, @CurrectUser() userId: string) {
     return this.videoService.likeVideo(Body, userId);
   }
+  @Get('likes')
+  @UseGuards(AuthGuard)
+  async findLikesVideo(
+    @Query() query: QueryFindAll,
+    @CurrectUser() userId: string,
+  ) {
+    return this.videoService.findLikesVideo(query, userId);
+  }
   @Post('hidden')
   @UseGuards(AuthGuard)
   async hiddenVideo(

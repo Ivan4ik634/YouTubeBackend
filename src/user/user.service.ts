@@ -123,6 +123,7 @@ export class UserService {
 
     return { message: 'Incorrect login or password' };
   }
+
   async verifyEmail(token: string) {
     const user = await this.jwt.verify(token, { secret: 'secret' });
     const userVerify = await this.user.findById(user._id);

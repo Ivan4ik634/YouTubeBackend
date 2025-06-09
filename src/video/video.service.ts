@@ -57,6 +57,22 @@ export class VideoService {
         })
       : [];
   }
+  async findLikesVideo(query: QueryFindAll, userId: string) {
+    const user = await this.user.findOne({ _id: userId });
+    console.log(user);
+    if (!user) return 'This user is not defined!';
+    const limit = query.limit || 10;
+    const page = query.page || 1;
+    const skip = (page - 1) * limit;
+    const videos = (await this.video
+      .find({ userId, likes: user._id })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .populate('userId')) as any;
+    console.log(videos);
+    return videos.length !== 0 ? videos : [];
+  }
   async findVideoByProfile(query: QueryFindAll, userId: string) {
     const limit = query.limit || 10;
     const page = query.page || 1;
