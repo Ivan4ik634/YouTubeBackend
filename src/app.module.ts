@@ -12,6 +12,7 @@ import { CommentModule } from './comment/comment.module';
 import { TotpModule } from './totp/totp.module';
 import { HttpModule } from '@nestjs/axios';
 import { SettingModule } from './setting/setting.module';
+import { PingModule } from './ping/ping.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SettingModule } from './setting/setting.module';
     CommentModule,
     TotpModule,
     SettingModule,
+    PingModule,
   ],
 })
 export class AppModule {}
