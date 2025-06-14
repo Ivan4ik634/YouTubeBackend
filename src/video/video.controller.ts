@@ -40,6 +40,21 @@ export class VideoController {
   ) {
     return this.videoService.findLikesVideo(query, userId);
   }
+  @Get('/profile')
+  @UseGuards(AuthGuard)
+  async findVideoByProfile(
+    @Query() query: QueryFindAll,
+    @CurrectUser() userId: string,
+  ) {
+    return this.videoService.findVideoByProfile(query, userId);
+  }
+  @Get('/profile/:userName')
+  async findVideoByUserProfile(
+    @Query() query: QueryFindAll,
+    @Param() param: { userName: string },
+  ) {
+    return this.videoService.findVideoByUserProfile(query, param);
+  }
   @Get(':id')
   async findOne(
     @Param() param: { id: string },
@@ -86,21 +101,6 @@ export class VideoController {
   @UseGuards(AuthGuard)
   async blockVideo(@Body() Body: { videoId: string }) {
     await this.videoService.blockVideo(Body.videoId);
-  }
-  @Get('/profile/:userName')
-  async findVideoByUserProfile(
-    @Query() query: QueryFindAll,
-    @Param() param: { userName: string },
-  ) {
-    return this.videoService.findVideoByUserProfile(query, param);
-  }
-  @Get('/profile')
-  @UseGuards(AuthGuard)
-  async findVideoByProfile(
-    @Query() query: QueryFindAll,
-    @CurrectUser() userId: string,
-  ) {
-    return this.videoService.findVideoByProfile(query, userId);
   }
 
   @Post('playlist')
