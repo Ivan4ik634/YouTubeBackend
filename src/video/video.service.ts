@@ -125,6 +125,7 @@ export class VideoService {
     }
 
     await this.video.updateOne({ _id: id }, { $inc: { views: 1 } });
+    await this.statistick.editStatistickVideo(String(video._id), 0, 1, 0);
     await video.save();
 
     return video;
