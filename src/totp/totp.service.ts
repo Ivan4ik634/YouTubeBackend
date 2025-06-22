@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/schemes/User.schema';
 
-import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { createEncryptor } from 'simple-encryptor';
+import * as speakeasy from 'speakeasy';
 
 @Injectable()
 export class TotpService {
-  secret = process.env.SECRET_KEY_ENCRYPTOR!;
+  secret = process.env.SECRET_KEY_ENCRYPTOR! || '8123881238812381123';
   myEncryptor = createEncryptor(this.secret);
   constructor(@InjectModel(User.name) private user: Model<User>) {}
 

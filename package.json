@@ -36,6 +36,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cloudinary": "^1.41.3",
+    "dayjs": "^1.11.13",
     "graphql": "^16.11.0",
     "mongoose": "^8.15.0",
     "multer": "^2.0.0",

@@ -4,20 +4,16 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Model, Types } from 'mongoose';
 
-import { Video } from 'src/schemes/Video.schema';
-import { HistoryVideo } from 'src/schemes/HistoryVideo.schema';
 import { QueryFindAll } from 'src/common/dto/queryFindAll';
-import { PlayList } from 'src/schemes/PlayList.schema';
 import { NotificationService } from 'src/notification/notification.service';
-import { User } from 'src/schemes/User.schema';
+import { HistoryVideo } from 'src/schemes/HistoryVideo.schema';
+import { PlayList } from 'src/schemes/PlayList.schema';
 import { Setting } from 'src/schemes/Setting.schema';
+import { User } from 'src/schemes/User.schema';
+import { Video } from 'src/schemes/Video.schema';
 
-import {
-  CreateVideoDto,
-  UpdateVideo,
-  LikeVideo,
-  createVideoInPlaylistDto,
-} from './dto/video';
+import { StatistickService } from 'src/statistick/statistick.service';
+import { CreateVideoDto, LikeVideo, UpdateVideo, createVideoInPlaylistDto } from './dto/video';
 
 @Injectable()
 export class VideoService {
@@ -28,14 +24,12 @@ export class VideoService {
     @InjectModel(PlayList.name) private playList: Model<PlayList>,
     @InjectModel(User.name) private user: Model<User>,
 
+    private readonly statistick: StatistickService,
     private readonly notification: NotificationService,
     private readonly jwt: JwtService,
   ) {}
 
-  async findVideoByUserProfile(
-    query: QueryFindAll,
-    param: { userName: string },
-  ) {
+  async findVideoByUserProfile(query: QueryFindAll, param: { userName: string }) {
     const limit = query.limit || 10;
     const page = query.page || 1;
     const skip = (page - 1) * limit;
@@ -50,10 +44,7 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return (
-            obj.userId.hidden === false ||
-            obj.userId.isVisibilityVideo === 'all'
-          );
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
         })
       : [];
   }
@@ -106,34 +97,20 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return (
-            obj.userId.hidden === false ||
-            obj.userId.isVisibilityVideo === 'all'
-          );
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
         })
       : [];
   }
 
   async findOne(id: string, bearer: string) {
-    const video = await this.video
-      .findOne({ _id: id })
-      .populate<{ userId: User & { _id: string } }>('userId');
-    const userId = bearer
-      ? await this.jwt.verify(bearer, { secret: 'secret' })
-      : '';
+    const video = await this.video.findOne({ _id: id }).populate<{ userId: User & { _id: string } }>('userId');
+    const userId = bearer ? await this.jwt.verify(bearer, { secret: 'secret' }) : '';
     const isVideoUser = userId === video?.userId._id.toString();
-    console.log(video);
+
     if (!video) return 'Video not found';
-    console.log(
-      video.userId.hidden,
-      video.isHidden,
-      isVideoUser,
-      video?.userId.isVisibilityVideo,
-    );
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
     if (video.isHidden && !isVideoUser) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser)
-      return 'Video not found';
+    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
 
     if (bearer) {
       const userId = await this.jwt.verify(bearer, { secret: 'secret' });
@@ -143,34 +120,46 @@ export class VideoService {
         videoId: id,
       });
       if (!historyVideo) {
-        if (userId)
-          await this.historyVideo.create({ userId: userId, videoId: id });
+        if (userId) await this.historyVideo.create({ userId: userId, videoId: id });
       }
     }
+
     await this.video.updateOne({ _id: id }, { $inc: { views: 1 } });
     await video.save();
+
     return video;
   }
   async createVideo(dto: CreateVideoDto, userId: string) {
     const video = await this.video.create({ ...dto, userId: userId });
     await video.save();
+
     const userUpdate = await this.user.findOne({ _id: userId });
+
     if (!userUpdate) return 'Пользователь не найден';
+
     userUpdate.videos = userUpdate.videos + 1;
+
     await userUpdate.save();
+    await this.statistick.createStatistickVideo(String(video._id));
+
     return video;
   }
   async deleteVideo(dto: { videoId: string }, userId: string) {
     const video = await this.video.findOne({ _id: dto.videoId });
+
     if (!video) return 'Video not found';
-    if (String(video.userId) !== userId)
-      return 'Вы не можете удалить этот видео';
+    if (String(video.userId) !== userId) return 'Вы не можете удалить этот видео';
 
     await this.historyVideo.deleteMany({ videoId: dto.videoId });
     await this.video.deleteOne({ _id: dto.videoId });
+    await this.statistick.deleteStatistickVideo(dto.videoId);
+
     const userUpdate = await this.user.findOne({ _id: userId });
+
     if (!userUpdate) return 'Пользователь не найден';
+
     userUpdate.videos = userUpdate.videos - 1;
+
     return { message: 'Video Delete' };
   }
   async recomendationsVideo() {
@@ -189,19 +178,19 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return (
-            obj.userId.hidden === false ||
-            obj.userId.isVisibilityVideo === 'all'
-          );
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
         })
       : [];
   }
   async updateVideo(dto: UpdateVideo, userId: string) {
     const video = await this.video.findOne({ _id: dto.videoId });
+
     if (!video) return 'Video not found';
     if (String(video.userId) !== userId) return 'You can`t update this video';
+
     await this.video.updateOne({ _id: dto.videoId }, { ...dto });
     await video.save();
+
     return video;
   }
   async likeVideo(dto: LikeVideo, userId: string) {
@@ -211,14 +200,21 @@ export class VideoService {
     if (String(video.likes).includes(userId)) {
       video.likes = video.likes.filter((id) => String(id) !== userId);
       video.likesCount = video.likesCount - 1;
+
+      await this.statistick.editStatistickVideo(String(video._id), -1, 0, 0);
+
       await video.save();
       return video;
     }
     video.likes.push(new Types.ObjectId(userId));
     video.likesCount = video.likesCount + 1;
+
+    await this.statistick.editStatistickVideo(String(video._id), 1, 0, 0);
+
     const setting = await this.setting.findOne({
       userId: String(video.userId),
     });
+
     if (setting?.websiteNotification && setting?.likeNotification) {
       await this.notification.createNotification(
         {
@@ -239,9 +235,7 @@ export class VideoService {
     if (!playlist) return 'Playlist not found';
 
     if (playlist.videosIds.some((item) => String(item) === String(video._id))) {
-      playlist.videosIds = playlist.videosIds.filter(
-        (id) => String(id) !== String(video._id),
-      );
+      playlist.videosIds = playlist.videosIds.filter((id) => String(id) !== String(video._id));
       await playlist.save();
       return 'Video save in playList';
     } else {
@@ -258,14 +252,8 @@ export class VideoService {
     if (String(video.userId) !== userId) return 'You no can hidden this video';
     video.isHidden = !video.isHidden;
     user.videos = video.isHidden ? user.videos - 1 : user.videos + 1;
-    await this.video.updateOne(
-      { _id: video._id },
-      { isHidden: !video.isHidden },
-    );
-    await this.user.updateOne(
-      { _id: user._id },
-      { $inc: { videos: video.isHidden ? -1 : 1 } },
-    );
+    await this.video.updateOne({ _id: video._id }, { isHidden: !video.isHidden });
+    await this.user.updateOne({ _id: user._id }, { $inc: { videos: video.isHidden ? -1 : 1 } });
     await video.save();
     await user.save();
     return `You video ${video.isHidden ? 'hidden' : 'unhidden'}!`;

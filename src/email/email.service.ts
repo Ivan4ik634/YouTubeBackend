@@ -3,15 +3,12 @@ import * as sgMail from '@sendgrid/mail';
 @Injectable()
 export class EmailService {
   constructor() {
-    sgMail.setApiKey(process.env.SENDGRID_URL!);
+    sgMail.setApiKey(
+      process.env.SENDGRID_URL! || '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',
+    );
   }
 
-  async sendEmail(
-    to: string,
-    subject: string,
-    text: string,
-    html?: string,
-  ): Promise<void> {
+  async sendEmail(to: string, subject: string, text: string, html?: string): Promise<void> {
     const msg = {
       to,
       from: 'ivanlevadny2010@gmail.com',
@@ -24,10 +21,7 @@ export class EmailService {
       await sgMail.send(msg);
       console.log(`Email sent to ${to}`);
     } catch (error) {
-      console.error(
-        'Error sending email:',
-        error.response?.body || error.message,
-      );
+      console.error('Error sending email:', error.response?.body || error.message);
       throw error;
     }
   }

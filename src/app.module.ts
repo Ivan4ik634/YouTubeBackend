@@ -13,6 +13,7 @@ import { TotpModule } from './totp/totp.module';
 import { HttpModule } from '@nestjs/axios';
 import { SettingModule } from './setting/setting.module';
 import { PingModule } from './ping/ping.module';
+import { StatistickModule } from './statistick/statistick.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PingModule } from './ping/ping.module';
     TotpModule,
     SettingModule,
     PingModule,
+    StatistickModule,
   ],
 })
 export class AppModule {}

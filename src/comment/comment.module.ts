@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-import { CommentService } from './comment.service';
-import { CommentController } from './comment.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { CommentSchema } from 'src/schemes/Comment.schema';
-import { NotificationModule } from 'src/notification/notification.module';
 import { JwtService } from '@nestjs/jwt';
-import { VideoSchema } from 'src/schemes/Video.schema';
-import { UserSchema } from 'src/schemes/User.schema';
+import { MongooseModule } from '@nestjs/mongoose';
+import { NotificationModule } from 'src/notification/notification.module';
+import { CommentSchema } from 'src/schemes/Comment.schema';
 import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
+import { UserSchema } from 'src/schemes/User.schema';
+import { VideoSchema } from 'src/schemes/Video.schema';
+import { StatistickModule } from 'src/statistick/statistick.module';
+import { CommentController } from './comment.controller';
+import { CommentService } from './comment.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
     MongooseModule.forFeature([{ name: 'Video', schema: VideoSchema }]),
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
-
+    StatistickModule,
     NotificationModule,
   ],
   controllers: [CommentController],
