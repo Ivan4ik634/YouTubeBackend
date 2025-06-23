@@ -59,12 +59,12 @@ export class StatistickService {
       },
     );
   }
-  async getStatistickVideo(videoId: string) {
+  async getStatistickVideo(userId:string,videoId: string) {
     const statistick = await this.statistick
       .findOne({ video: videoId })
       .populate({ path: 'statistick', populate: { path: 'days' } });
     if (!statistick) return 'Statistick not found';
-    return statistick.statistick;
+    return statistick;
   }
   async deleteStatistickVideo(videoId: string) {
     await this.statistick.deleteOne({ video: videoId });

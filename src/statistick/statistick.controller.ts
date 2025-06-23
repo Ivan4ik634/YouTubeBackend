@@ -1,4 +1,5 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { CurrectUser } from 'src/common/decorators/userCurrect.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { StatistickService } from './statistick.service';
 
@@ -8,7 +9,7 @@ export class StatistickController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  async getStatistickVideo(@Param() param: { videoId: string }) {
-    return this.statistickService.getStatistickVideo(param.videoId);
+  async getStatistickVideo(@CurrectUser() userId: string, @Param() param: { id: string }) {
+    return this.statistickService.getStatistickVideo(userId, param.id);
   }
 }
