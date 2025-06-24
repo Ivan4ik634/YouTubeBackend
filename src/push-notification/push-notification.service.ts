@@ -18,7 +18,7 @@ export class PushNotificationService {
           headers: {
             accept: 'application/json',
             Authorization:
-              'Key os_v2_app_qq4rhv3os5bkfgvmml7dyj5zugdraw74k3vuwz5ygmpdyuykpxapoxdlghgvcpm4iawn7g2746opymoywfbzfbyyafsy56b6uyna3oi',
+              'Key os_v2_app_qq4rhv3os5bkfgvmml7dyj5zugdraw74k3vuwz5ygmpdyuykpxaio5jlcnttmirspt4icjmdp3av5jn4byzghsxima6ejivpji7oq6q',
             'content-type': 'application/json',
           },
         },
