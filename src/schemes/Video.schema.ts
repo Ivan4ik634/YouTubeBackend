@@ -32,6 +32,9 @@ export class Video {
   @Prop({ type: Number, default: 0 })
   likesCount: number;
 
+  @Prop({ type: [Types.ObjectId], ref: 'Report', default: [] })
+  reports: Types.ObjectId[];
+
   @Prop({ type: Number, default: 0 })
   commentsCount: number;
 

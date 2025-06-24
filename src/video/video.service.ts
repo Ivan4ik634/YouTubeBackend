@@ -15,6 +15,10 @@ import { Video } from 'src/schemes/Video.schema';
 import { StatistickService } from 'src/statistick/statistick.service';
 import { CreateVideoDto, LikeVideo, UpdateVideo, createVideoInPlaylistDto } from './dto/video';
 
+import { Mistral } from '@mistralai/mistralai';
+import { Report } from 'src/schemes/Report.schema';
+import { ResponseMistralRepostT } from './dto/ResponseMistralRepost';
+
 @Injectable()
 export class VideoService {
   constructor(
@@ -23,6 +27,7 @@ export class VideoService {
     @InjectModel(Setting.name) private setting: Model<Setting>,
     @InjectModel(PlayList.name) private playList: Model<PlayList>,
     @InjectModel(User.name) private user: Model<User>,
+    @InjectModel(Report.name) private report: Model<Report>,
 
     private readonly statistick: StatistickService,
     private readonly notification: NotificationService,
@@ -44,7 +49,7 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
         })
       : [];
   }
@@ -97,7 +102,7 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
         })
       : [];
   }
@@ -111,6 +116,8 @@ export class VideoService {
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
     if (video.isHidden && !isVideoUser) return 'Video not found';
     if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
+    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
+    if (video.isBlocked === false) return 'Video not found';
 
     if (bearer) {
       const userId = await this.jwt.verify(bearer, { secret: 'secret' });
@@ -179,7 +186,7 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all';
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
         })
       : [];
   }
@@ -265,5 +272,84 @@ export class VideoService {
     video.isBlocked = !video.isBlocked;
     await video.save();
     return video;
+  }
+
+  async reportVideo(data: { category: string; videoId: string }, userId: string) {
+    const video = await this.video.findOne({ _id: data.videoId });
+
+    console.log(video);
+    if (!video) return 'video not found';
+
+    const reportExists = await this.report.findOne({ userId: userId });
+    if (reportExists) return 'There is already a report from you!';
+
+    const newReport = await this.report.create({ videoId: data.videoId, userId: userId, category: data.category });
+
+    const reportsDB = await this.report.find({ videoId: String(video._id) });
+
+    const reports: { videoId: string; category: { id: string; users: string[] } }[] = [];
+
+    for (let i = 0; i <= reportsDB.length - 1; i++) {
+      if (reports.some((obj) => obj.category.id === reportsDB[i].category)) {
+        reports
+          .find((obj) => obj.category.id === reportsDB[i].category)
+          ?.category.users.push(String(reportsDB[i].userId));
+      } else {
+        reports.push({
+          videoId: String(video._id),
+          category: { id: reportsDB[i].category, users: [String(reportsDB[i].userId)] },
+        });
+      }
+    }
+    console.log(reports);
+
+    const users = await this.user.find();
+
+    const text = `
+    
+    Видео на модерацию:
+- Название: "${video.title}"
+- Описание: "${video.description || 'нет описания'}"
+- Жалоб: ${reportsDB.length} из ${users.length} пользователей (${Math.round((reportsDB.length / users.length) * 100)}%)
+- Категория жалоб: ${reports.map((item) => `${item.category.id}: ${item.category.users.length}`).join(', ')}
+- Коментов: ${video.commentsCount}
+- Превью: ${video.preview}
+- Просмотров: ${video.views || 0}
+- Лайков: ${video.likesCount || 0} 👍
+- Дата загрузки: ${video.createdAt}
+- Теги: ${video.tags?.join(', ') || 'нет тегов'}
+
+Рекомендация (ответь строго JSON):
+{
+  "should_ban": boolean,
+  "reason": string,
+  "confidence": number (0-1),
+  "suggested_action": "full_ban"|"age_restrict"|"demonetize"|"warning"|"no_action"
+}
+  `;
+
+    console.log(text);
+    const apiKey = '2fe0qXmgfCCxS3X7NzzMfKYfaBqIJgFo';
+    try {
+      const client = new Mistral({ apiKey: apiKey });
+
+      const chatResponse = await client.chat.complete({
+        model: 'mistral-large-latest',
+        messages: [{ role: 'user', content: text }],
+      });
+
+      const pureJsonString = chatResponse.choices[0].message.content
+        ?.toString()!
+        .replace(/^```json\s*/, '') // Удаляем начало
+        .replace(/\s*```$/, ''); // Удаляем конец
+      const mistarlResponse: ResponseMistralRepostT = JSON.parse(pureJsonString!);
+      console.log(mistarlResponse);
+      if (mistarlResponse.should_ban) {
+        video.isBlocked = true;
+        await video.save();
+      }
+    } catch (error) {
+      console.error('Ошибка при отправке запроса:', error);
+    }
   }
 }

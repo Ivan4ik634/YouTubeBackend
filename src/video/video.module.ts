@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { HistoryVideo, HistoryVideoSchema } from 'src/schemes/HistoryVideo.schema';
 import { PlayList, PlayListSchema } from 'src/schemes/PlayList.schema';
 import { PlayListVideo, PlayListVideoSchema } from 'src/schemes/PlayListVideo.schema';
+import { Report, ReportSchema } from 'src/schemes/Report.schema';
 import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
 import { User, UserSchema } from 'src/schemes/User.schema';
 import { Video, VideoSchema } from 'src/schemes/Video.schema';
@@ -20,6 +21,7 @@ import { VideoService } from './video.service';
     MongooseModule.forFeature([{ name: PlayList.name, schema: PlayListSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
+    MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }]),
     NotificationModule,
     StatistickModule,
   ],

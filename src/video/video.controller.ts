@@ -1,24 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { VideoService } from './video.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CurrectUser } from 'src/common/decorators/userCurrect.decorator';
-import {
-  CreateVideoDto,
-  createVideoInPlaylistDto,
-  LikeVideo,
-  UpdateVideo,
-} from './dto/video';
-import { AuthGuard } from 'src/common/guards/auth.guard';
 import { QueryFindAll } from 'src/common/dto/queryFindAll';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { CreateVideoDto, createVideoInPlaylistDto, LikeVideo, UpdateVideo } from './dto/video';
+import { VideoService } from './video.service';
 
 @Controller('video')
 export class VideoController {
@@ -34,40 +19,25 @@ export class VideoController {
   }
   @Get('likes')
   @UseGuards(AuthGuard)
-  async findLikesVideo(
-    @Query() query: QueryFindAll,
-    @CurrectUser() userId: string,
-  ) {
+  async findLikesVideo(@Query() query: QueryFindAll, @CurrectUser() userId: string) {
     return this.videoService.findLikesVideo(query, userId);
   }
   @Get('/profile')
   @UseGuards(AuthGuard)
-  async findVideoByProfile(
-    @Query() query: QueryFindAll,
-    @CurrectUser() userId: string,
-  ) {
+  async findVideoByProfile(@Query() query: QueryFindAll, @CurrectUser() userId: string) {
     return this.videoService.findVideoByProfile(query, userId);
   }
   @Get('/profile/:userName')
-  async findVideoByUserProfile(
-    @Query() query: QueryFindAll,
-    @Param() param: { userName: string },
-  ) {
+  async findVideoByUserProfile(@Query() query: QueryFindAll, @Param() param: { userName: string }) {
     return this.videoService.findVideoByUserProfile(query, param);
   }
   @Get(':id')
-  async findOne(
-    @Param() param: { id: string },
-    @Body() body: { bearer: string },
-  ) {
+  async findOne(@Param() param: { id: string }, @Body() body: { bearer: string }) {
     return this.videoService.findOne(param.id, body.bearer);
   }
   @Post()
   @UseGuards(AuthGuard)
-  async createVideo(
-    @Body() Body: CreateVideoDto,
-    @CurrectUser() userId: string,
-  ) {
+  async createVideo(@Body() Body: CreateVideoDto, @CurrectUser() userId: string) {
     return this.videoService.createVideo(Body, userId);
   }
   @Patch()
@@ -77,10 +47,7 @@ export class VideoController {
   }
   @Delete()
   @UseGuards(AuthGuard)
-  async deleteVideo(
-    @Body() Body: { videoId: string },
-    @CurrectUser() userId: string,
-  ) {
+  async deleteVideo(@Body() Body: { videoId: string }, @CurrectUser() userId: string) {
     return this.videoService.deleteVideo(Body, userId);
   }
   @Post('like')
@@ -89,12 +56,14 @@ export class VideoController {
     return this.videoService.likeVideo(Body, userId);
   }
 
+  @Post('report')
+  @UseGuards(AuthGuard)
+  async reportVideo(@Body() body: { category: string; videoId: string }, @CurrectUser() userId: string) {
+    return this.videoService.reportVideo(body, userId);
+  }
   @Post('hidden')
   @UseGuards(AuthGuard)
-  async hiddenVideo(
-    @Body() Body: { id: string },
-    @CurrectUser() userId: string,
-  ) {
+  async hiddenVideo(@Body() Body: { id: string }, @CurrectUser() userId: string) {
     return this.videoService.hiddenVideo(Body.id, userId);
   }
   @Post('block')
