@@ -88,8 +88,7 @@ export class VideoService {
     const page = query.page || 1;
     const skip = (page - 1) * limit;
     const search = query.search || '';
-    await this.pushNotification.sendPushNotification('Тест сообщения!', 'тест сообщения');
-    console.log('Сообщения должно прийти ! ');
+
     const videos = await this.video
       .find({
         isHidden: false,
@@ -185,7 +184,8 @@ export class VideoService {
       })
       .limit(5)
       .populate<{ userId: User }>('userId');
-    console.log(videos);
+    await this.pushNotification.sendPushNotification('Тест сообщения!', 'тест сообщения');
+    console.log('Сообщения должно прийти ! ');
     return videos.length !== 0
       ? videos.filter((obj) => {
           return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
