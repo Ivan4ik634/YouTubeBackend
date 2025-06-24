@@ -9,7 +9,7 @@ export class PushNotificationService {
         'https://api.onesignal.com/notifications?c=push',
         {
           app_id: '843913d7-6e97-42a2-9aac-62fe3c27b9a1',
-          included_segments: playerIds, // або user_ids
+          include_player_ids: playerIds,
           headings: { en: title },
           contents: { en: message },
           url: 'https://white-youtube.vercel.app',
@@ -23,7 +23,7 @@ export class PushNotificationService {
           },
         },
       );
-      return res.data
+      return res.data;
     } catch (err) {
       console.error('Push error:', err.response?.data || err.message);
     }
