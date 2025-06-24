@@ -283,7 +283,7 @@ export class VideoService {
     if (reportExists) return 'There is already a report from you!';
 
     const newReport = await this.report.create({ videoId: data.videoId, userId: userId, category: data.category });
-
+    await this.video.updateOne({ _id: video._id }, { $push: { reports: newReport._id } });
     const reportsDB = await this.report.find({ videoId: String(video._id) });
 
     const reports: { videoId: string; category: { id: string; users: string[] } }[] = [];
