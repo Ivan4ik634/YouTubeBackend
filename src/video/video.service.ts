@@ -116,8 +116,7 @@ export class VideoService {
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
     if (video.isHidden && !isVideoUser) return 'Video not found';
     if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
-    if (video.isBlocked === false) return 'Video not found';
+    if (video.isBlocked === true) return 'Video not found';
 
     if (bearer) {
       const userId = await this.jwt.verify(bearer, { secret: 'secret' });
