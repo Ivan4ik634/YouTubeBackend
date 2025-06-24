@@ -149,12 +149,12 @@ export class VideoService {
 
     userUpdate.videos = userUpdate.videos + 1;
 
-    await this.pushNotification.sendPushNotification(
+    const res = await this.pushNotification.sendPushNotification(
       userUpdate.subscribers.map((obj) => obj.playerId),
       `У ${userUpdate.username} нове відео!`,
       `Перегляньте прямо зараз 🔥`,
     );
-
+    console.log(res);
     await userUpdate.save();
     await this.statistick.createStatistickVideo(String(video._id));
 

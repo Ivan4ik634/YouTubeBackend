@@ -5,7 +5,7 @@ import axios from 'axios';
 export class PushNotificationService {
   async sendPushNotification(playerIds: string[], title: string, message: string, url?: string) {
     try {
-      await axios.post(
+      const res = await axios.post(
         'https://api.onesignal.com/notifications?c=push',
         {
           app_id: '843913d7-6e97-42a2-9aac-62fe3c27b9a1',
@@ -23,6 +23,7 @@ export class PushNotificationService {
           },
         },
       );
+      return res.data
     } catch (err) {
       console.error('Push error:', err.response?.data || err.message);
     }
