@@ -8,7 +8,7 @@ export class PushNotificationService {
       await axios.post(
         'https://onesignal.com/api/v1/notifications',
         {
-          app_id: process.env.ONE_SIGNAL_APP_ID,
+          app_id: '843913d7-6e97-42a2-9aac-62fe3c27b9a1',
           included_segments: ['Subscribed Users'], // або user_ids
           headings: { en: title },
           contents: { en: message },
@@ -16,7 +16,7 @@ export class PushNotificationService {
         },
         {
           headers: {
-            Authorization: `Basic ${process.env.ONE_SIGNAL_API_KEY}`,
+            Authorization: `Basic os_v2_app_qq4rhv3os5bkfgvmml7dyj5zugdraw74k3vuwz5ygmpdyuykpxapoxdlghgvcpm4iawn7g2746opymoywfbzfbyyafsy56b6uyna3oi`,
             'Content-Type': 'application/json',
           },
         },

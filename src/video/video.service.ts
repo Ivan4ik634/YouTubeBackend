@@ -89,6 +89,7 @@ export class VideoService {
     const skip = (page - 1) * limit;
     const search = query.search || '';
     await this.pushNotification.sendPushNotification('Тест сообщения!', 'тест сообщения');
+    console.log('Сообщения должно прийти ! ');
     const videos = await this.video
       .find({
         isHidden: false,
