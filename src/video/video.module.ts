@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 import { HistoryVideo, HistoryVideoSchema } from 'src/schemes/HistoryVideo.schema';
 import { PlayList, PlayListSchema } from 'src/schemes/PlayList.schema';
 import { PlayListVideo, PlayListVideoSchema } from 'src/schemes/PlayListVideo.schema';
@@ -22,6 +23,7 @@ import { VideoService } from './video.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
     MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }]),
+    PushNotificationModule,
     NotificationModule,
     StatistickModule,
   ],

@@ -2,6 +2,7 @@ export class RegisterDto {
   username: string;
   email: string;
   password: string;
+  playerId: string;
 }
 
 export class LoginDto {

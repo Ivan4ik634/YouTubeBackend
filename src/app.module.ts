@@ -15,6 +15,7 @@ import { TotpModule } from './totp/totp.module';
 import { UploadModule } from './upload/upload.module';
 import { UserModule } from './user/user.module';
 import { VideoModule } from './video/video.module';
+import { PushNotificationModule } from './push-notification/push-notification.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { VideoModule } from './video/video.module';
     SettingModule,
     PingModule,
     StatistickModule,
+    PushNotificationModule,
   ],
 })
 export class AppModule {}

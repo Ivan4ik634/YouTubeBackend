@@ -16,6 +16,7 @@ import { StatistickService } from 'src/statistick/statistick.service';
 import { CreateVideoDto, LikeVideo, UpdateVideo, createVideoInPlaylistDto } from './dto/video';
 
 import { Mistral } from '@mistralai/mistralai';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { Report } from 'src/schemes/Report.schema';
 import { ResponseMistralRepostT } from './dto/ResponseMistralRepost';
 
@@ -32,6 +33,7 @@ export class VideoService {
     private readonly statistick: StatistickService,
     private readonly notification: NotificationService,
     private readonly jwt: JwtService,
+    private readonly pushNotification: PushNotificationService,
   ) {}
 
   async findVideoByUserProfile(query: QueryFindAll, param: { userName: string }) {
@@ -86,7 +88,7 @@ export class VideoService {
     const page = query.page || 1;
     const skip = (page - 1) * limit;
     const search = query.search || '';
-
+    await this.pushNotification.sendPushNotification('Тест сообщения!', 'тест сообщения');
     const videos = await this.video
       .find({
         isHidden: false,
