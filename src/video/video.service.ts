@@ -16,6 +16,7 @@ import { StatistickService } from 'src/statistick/statistick.service';
 import { CreateVideoDto, LikeVideo, UpdateVideo, createVideoInPlaylistDto } from './dto/video';
 
 import { Mistral } from '@mistralai/mistralai';
+import { UserDto } from 'src/common/dto/user.dto';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { Report } from 'src/schemes/Report.schema';
 import { ResponseMistralRepostT } from './dto/ResponseMistralRepost';
@@ -142,11 +143,17 @@ export class VideoService {
     const video = await this.video.create({ ...dto, userId: userId });
     await video.save();
 
-    const userUpdate = await this.user.findOne({ _id: userId });
+    const userUpdate = await this.user.findOne({ _id: userId }).populate<{ subscribers: UserDto[] }>('subscribers');
 
     if (!userUpdate) return 'Пользователь не найден';
 
     userUpdate.videos = userUpdate.videos + 1;
+
+    await this.pushNotification.sendPushNotification(
+      userUpdate.subscribers.map((obj) => obj.playerId),
+      `У ${userUpdate.username} нове відео!`,
+      `Перегляньте прямо зараз 🔥`,
+    );
 
     await userUpdate.save();
     await this.statistick.createStatistickVideo(String(video._id));
@@ -171,6 +178,7 @@ export class VideoService {
 
     return { message: 'Video Delete' };
   }
+
   async recomendationsVideo() {
     const videos = await this.video
       .find({
@@ -184,8 +192,6 @@ export class VideoService {
       })
       .limit(5)
       .populate<{ userId: User }>('userId');
-    await this.pushNotification.sendPushNotification('Тест сообщения!', 'тест сообщения');
-    console.log('Сообщения должно прийти ! ');
     return videos.length !== 0
       ? videos.filter((obj) => {
           return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
@@ -277,7 +283,7 @@ export class VideoService {
   }
 
   async reportVideo(data: { category: string; videoId: string }, userId: string) {
-    const video = await this.video.findOne({ _id: data.videoId });
+    const video = await this.video.findOne({ _id: data.videoId }).populate<{ userId: UserDto }>('userId');
 
     console.log(video);
     if (!video) return 'video not found';
@@ -347,6 +353,12 @@ export class VideoService {
       const mistarlResponse: ResponseMistralRepostT = JSON.parse(pureJsonString!);
       console.log(mistarlResponse);
       if (mistarlResponse.should_ban) {
+        await this.pushNotification.sendPushNotification(
+          [video.userId.playerId],
+          `У вас заблокували відео`,
+          `Назва відео : ${video.title}`,
+        );
+
         video.isBlocked = true;
         await video.save();
       }

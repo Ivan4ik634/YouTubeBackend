@@ -3,22 +3,22 @@ import axios from 'axios';
 
 @Injectable()
 export class PushNotificationService {
-  async sendPushNotification(title: string, message: string, url?: string) {
+  async sendPushNotification(playerIds: string[], title: string, message: string, url?: string) {
     try {
       await axios.post(
         'https://api.onesignal.com/notifications?c=push',
         {
           app_id: '843913d7-6e97-42a2-9aac-62fe3c27b9a1',
-          included_segments: ['Subscribed Users'], // або user_ids
+          included_segments: playerIds, // або user_ids
           headings: { en: title },
           contents: { en: message },
-          url: url || 'https://white-youtube.vercel.app',
+          url: 'https://white-youtube.vercel.app',
         },
         {
           headers: {
             accept: 'application/json',
             Authorization:
-              'Key os_v2_app_qq4rhv3os5bkfgvmml7dyj5zugdraw74k3vuwz5ygmpdyuykpxaio5jlcnttmirspt4icjmdp3av5jn4byzghsxima6ejivpji7oq6q',
+              'Key os_v2_app_qq4rhv3os5bkfgvmml7dyj5zuhvowilxf2welxnnwqj3pju46bqoup3op5ogavfnsanldyai44zuyadsm2qzb4ml453jffdnm4ozeiy',
             'content-type': 'application/json',
           },
         },

@@ -5,4 +5,5 @@ export class UserDto {
   password: string;
   blocedUsers: string[];
   subscrides: string[];
+  playerId: string;
 }

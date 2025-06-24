@@ -38,7 +38,7 @@ export class User {
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   blocedUsers: Types.ObjectId[];
 
-  @Prop({ type: [Types.ObjectId], default: [] })
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   subscribers: Types.ObjectId[];
 
   @Prop({ type: String, required: true })
