@@ -153,6 +153,8 @@ export class VideoService {
       userUpdate.subscribers.map((obj) => obj.playerId),
       `У ${userUpdate.username} нове відео!`,
       `Перегляньте прямо зараз 🔥`,
+      `https://white-youtube.vercel.app/profile/${userUpdate.username}`,
+      `${video.preview}`,
     );
     console.log(res);
     await userUpdate.save();
