@@ -44,6 +44,9 @@ export class User {
   @Prop({ type: [String], required: true })
   playerIds: string[];
 
+  @Prop({ default: false })
+  isCheck: boolean;
+
   @Prop({ type: Number, default: 0 })
   videos: number;
 }
