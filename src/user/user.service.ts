@@ -180,20 +180,22 @@ export class UserService {
   async blockUser(userId: string, dto: string) {
     console.log(dto);
     const user = await this.user.findOne({ _id: dto });
+    const userMe = await this.user.findOne({ _id: userId });
     if (!user) return 'Такого пользователя не существует';
+    if (!userMe) return 'Такого пользователя не существует';
     const isBlock = await this.user.findOne({
-      user: userId,
+      _id: userId,
       blocedUsers: { $in: user._id },
     });
     if (isBlock) {
-      user.blocedUsers = user.blocedUsers.filter((id) =>
-        id.equals ? !id.equals(userId) : String(id) !== String(userId),
+      userMe.blocedUsers = userMe.blocedUsers.filter((id) =>
+        id.equals ? !id.equals(String(user._id)) : String(id) !== String(user._id),
       );
-      await user.save();
+      await userMe.save();
       return 'Вы разблокировали пользователя';
     } else {
-      user.blocedUsers.push(new Types.ObjectId(userId));
-      await user.save();
+      userMe.blocedUsers.push(user._id);
+      await userMe.save();
       return 'Вы заблокировали пользователя';
     }
   }
