@@ -150,9 +150,9 @@ export class VideoService {
     userUpdate.videos = userUpdate.videos + 1;
 
     const res = await this.pushNotification.sendPushNotification(
-      userUpdate.subscribers.map((obj) => obj.playerId),
-      `У ${userUpdate.username} нове відео!`,
-      `Перегляньте прямо зараз 🔥`,
+      userUpdate.subscribers.map((obj) => obj.playerIds).flat(),
+      `A new video has appeared on ${userUpdate.username}`,
+      `Watch now video 🔥`,
       `https://white-youtube.vercel.app/profile/${userUpdate.username}`,
       `${video.preview}`,
     );
@@ -356,9 +356,10 @@ export class VideoService {
       console.log(mistarlResponse);
       if (mistarlResponse.should_ban) {
         await this.pushNotification.sendPushNotification(
-          [video.userId.playerId],
-          `У вас заблокували відео`,
-          `Назва відео : ${video.title}`,
+          video.userId.playerIds,
+          `Your video has been blocked.`,
+          `Video name : ${video.title}`,
+          `https://white-youtube.vercel.app/studio`,
         );
 
         video.isBlocked = true;
