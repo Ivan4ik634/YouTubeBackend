@@ -41,8 +41,8 @@ export class User {
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   subscribers: Types.ObjectId[];
 
-  @Prop({ type: String, required: true })
-  playerId: string;
+  @Prop({ type: [String], required: true })
+  playerIds: string[];
 
   @Prop({ type: Number, default: 0 })
   videos: number;
