@@ -112,8 +112,8 @@ export class VideoService {
 
   async findOne(id: string, bearer: string) {
     const video = await this.video.findOne({ _id: id }).populate<{ userId: User & { _id: string } }>('userId');
-    const userId = bearer ? await this.jwt.verify(bearer, { secret: 'secret' }) : '';
-    const isVideoUser = userId === video?.userId._id.toString();
+    const payload: { _id: string } = bearer ? await this.jwt.verify(bearer, { secret: 'secret' }) : { _id: '' };
+    const isVideoUser = payload._id === video?.userId._id.toString();
 
     if (!video) return 'Video not found';
     if (video.userId.hidden && !isVideoUser) return 'Video not found';
@@ -122,14 +122,12 @@ export class VideoService {
     if (video.isBlocked === true) return 'Video not found';
 
     if (bearer) {
-      const userId = await this.jwt.verify(bearer, { secret: 'secret' });
-
       const historyVideo = await this.historyVideo.findOne({
-        userId: userId,
+        userId: payload._id,
         videoId: id,
       });
       if (!historyVideo) {
-        if (userId) await this.historyVideo.create({ userId: userId, videoId: id });
+        if (payload) await this.historyVideo.create({ userId: payload._id, videoId: id });
       }
     }
 
@@ -149,6 +147,8 @@ export class VideoService {
 
     userUpdate.videos = userUpdate.videos + 1;
 
+    await userUpdate.save();
+    await this.statistick.createStatistickVideo(String(video._id));
     const res = await this.pushNotification.sendPushNotification(
       userUpdate.subscribers.map((obj) => obj.playerIds).flat(),
       `A new video has appeared on ${userUpdate.username}`,
@@ -157,9 +157,6 @@ export class VideoService {
       `${video.preview}`,
     );
     console.log(res);
-    await userUpdate.save();
-    await this.statistick.createStatistickVideo(String(video._id));
-
     return video;
   }
   async deleteVideo(dto: { videoId: string }, userId: string) {
