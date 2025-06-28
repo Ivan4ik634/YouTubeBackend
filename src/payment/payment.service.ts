@@ -18,6 +18,8 @@ export class PaymentService {
   }
 
   async createCheckoutSession(amount: number, userId: string) {
+    const user = await this.user.findById(userId);
+    if (!user) return;
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -40,19 +42,21 @@ export class PaymentService {
       cancel_url: `http://localhost:3000/cancel`,
     });
 
-    await this.payment.create({ paymentId: session.id, status: 'pending', amount, userId });
+    await this.payment.create({ paymentId: session.id, status: 'pending', amount, userId: user._id });
     return session; // редиректить сюда
   }
   async successPayment(paymentId: string, userId: string) {
     const payment = await this.payment.findOne({ paymentId: paymentId });
     if (!payment) return 'Payment not found';
-    const user = await this.user.findOne({ _id: userId });
+    const user = await this.user.findById(userId);
+
     if (!user) return 'User not found';
     const updatedUser = await this.user.findOneAndUpdate(
       { _id: user._id },
-      { $push: { balance: payment.amount * 100 } },
+      { balance: user.balance + payment.amount * 100 },
     );
     await this.payment.updateOne({ paymentId: paymentId }, { status: 'success' });
+    await payment.save();
     return updatedUser;
   }
 }
