@@ -14,9 +14,7 @@ export class PaymentService {
     @InjectModel(Payment.name) private payment: Model<Payment>,
     @InjectModel(User.name) private user: Model<User>,
   ) {
-    this.stripe = new Stripe(
-      'sk_test_51ReZUxIC3cRUAUYkeT4Pmvh54BKgxxCSi3Ex7Q83yv1LhbJFRRudUbNcYymHF81WlRx80OSOJnKNSoO6KpGrZnK700wWJ2Qe66',
-    );
+    this.stripe = new Stripe(process.env.STRAPI_API_KEY!);
   }
 
   async createCheckoutSession(amount: number, userId: string) {
