@@ -16,6 +16,7 @@ import { UploadModule } from './upload/upload.module';
 import { UserModule } from './user/user.module';
 import { VideoModule } from './video/video.module';
 import { PushNotificationModule } from './push-notification/push-notification.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { PushNotificationModule } from './push-notification/push-notification.mo
     PingModule,
     StatistickModule,
     PushNotificationModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}
