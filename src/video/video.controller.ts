@@ -35,6 +35,12 @@ export class VideoController {
   async findOne(@Param() param: { id: string }, @Body() body: { bearer: string }) {
     return this.videoService.findOne(param.id, body.bearer);
   }
+  @Post('pay')
+  @UseGuards(AuthGuard)
+  async payVideo(@Body() body: { videoId: string }, @CurrectUser() userId: string) {
+    return this.videoService.payVideo(body, userId);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
   async createVideo(@Body() Body: CreateVideoDto, @CurrectUser() userId: string) {

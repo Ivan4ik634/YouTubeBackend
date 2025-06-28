@@ -23,6 +23,12 @@ export class Video {
   @Prop({ type: String, required: true })
   description: string;
 
+  @Prop({ type: Number, default: 0 })
+  price: number;
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  purchasedBy: Types.ObjectId[];
+
   @Prop({ type: [String], required: true })
   tags: string[];
 

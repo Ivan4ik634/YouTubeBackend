@@ -13,7 +13,7 @@ export class Payment {
   @Prop({ required: true })
   status: string;
 
-  @Prop()
+  @Prop({ default: Date.now })
   createdAt: Date;
 
   @Prop({ required: true })

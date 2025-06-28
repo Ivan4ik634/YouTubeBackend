@@ -13,5 +13,6 @@ import { PaymentService } from './payment.service';
   ],
   controllers: [PaymentController],
   providers: [PaymentService, JwtService],
+  exports: [PaymentService],
 })
 export class PaymentModule {}

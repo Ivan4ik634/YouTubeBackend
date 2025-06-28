@@ -3,6 +3,7 @@ export class CreateVideoDto {
   description: string;
   tags: string[];
   preview: string;
+  price: number;
   isCommentDisabled: boolean;
   isHidden: boolean;
   video: string[];
@@ -10,6 +11,7 @@ export class CreateVideoDto {
 
 export class UpdateVideo {
   title: string;
+  price: number;
   description: string;
   videoId: string;
   tags: string[];

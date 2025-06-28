@@ -17,6 +17,7 @@ import { CreateVideoDto, LikeVideo, UpdateVideo, createVideoInPlaylistDto } from
 
 import { Mistral } from '@mistralai/mistralai';
 import { UserDto } from 'src/common/dto/user.dto';
+import { PaymentService } from 'src/payment/payment.service';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { Report } from 'src/schemes/Report.schema';
 import { ResponseMistralRepostT } from './dto/ResponseMistralRepost';
@@ -35,6 +36,7 @@ export class VideoService {
     private readonly notification: NotificationService,
     private readonly jwt: JwtService,
     private readonly pushNotification: PushNotificationService,
+    private readonly payment: PaymentService,
   ) {}
 
   async findVideoByUserProfile(query: QueryFindAll, param: { userName: string }) {
@@ -113,13 +115,14 @@ export class VideoService {
   async findOne(id: string, bearer: string) {
     const video = await this.video.findOne({ _id: id }).populate<{ userId: User & { _id: string } }>('userId');
     const payload: { _id: string } = bearer ? await this.jwt.verify(bearer, { secret: 'secret' }) : { _id: '' };
-    const isVideoUser = payload._id === video?.userId._id.toString();
+    const isAutor = payload._id === video?.userId._id.toString();
 
     if (!video) return 'Video not found';
-    if (video.userId.hidden && !isVideoUser) return 'Video not found';
-    if (video.isHidden && !isVideoUser) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting' && !isVideoUser) return 'Video not found';
+    if (video.userId.hidden && !isAutor) return 'Video not found';
+    if (video.isHidden && !isAutor) return 'Video not found';
+    if (video?.userId.isVisibilityVideo === 'noting' && !isAutor) return 'Video not found';
     if (video.isBlocked === true) return 'Video not found';
+    if (!video.purchasedBy.some((obj) => obj.toString() === payload._id) && !isAutor) return 'Video not found';
 
     if (bearer) {
       const historyVideo = await this.historyVideo.findOne({
@@ -365,5 +368,16 @@ export class VideoService {
     } catch (error) {
       console.error('Ошибка при отправке запроса:', error);
     }
+  }
+  async payVideo(body: { videoId: string }, userId: string) {
+    const video = await this.video.findOne({ _id: body.videoId }).populate<{ userId: UserDto }>('userId');
+    if (!video) return 'video not found';
+    await this.payment.moneyTransfer({ amount: video.price, userTransfer: video.userId._id }, userId);
+    await this.pushNotification.sendPushNotification(
+      video.userId.playerIds,
+      `Your video has been paid for`,
+      `Video name : ${video.title} , price: ${video.price}MN `,
+      `https://white-youtube.vercel.app/wallet`,
+    );
   }
 }
