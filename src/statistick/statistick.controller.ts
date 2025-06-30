@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CurrectUser } from 'src/common/decorators/userCurrect.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { StatistickService } from './statistick.service';
@@ -12,7 +12,7 @@ export class StatistickController {
   async getStatistickVideo(@CurrectUser() userId: string, @Body() body: { id: string }) {
     return this.statistickService.getStatistickVideo(userId, body.id);
   }
-  @Post()
+  @Get('/wallet')
   @UseGuards(AuthGuard)
   async getStatistickWallet(@CurrectUser() userId: string) {
     return this.statistickService.getStatistickWallet(userId);
