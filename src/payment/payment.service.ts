@@ -31,7 +31,7 @@ export class PaymentService {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Пополнение счёта',
+              name: 'Account replenishment',
             },
             unit_amount: amount * 100, // в центах
           },
@@ -41,8 +41,8 @@ export class PaymentService {
       metadata: {
         userId,
       },
-      success_url: `http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:3000/cancel?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `https://white-youtube.vercel.app/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://white-youtube.vercel.app/cancel?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     await this.payment.create({ paymentId: session.id, status: 'pending', amount, userId: user._id });
@@ -62,7 +62,7 @@ export class PaymentService {
       );
 
       await this.payment.updateOne({ paymentId: paymentId }, { status: 'success' });
-      await this.transfer.create({ from: null, to: user._id, amount: payment.amount, type: 'payment' });
+      await this.transfer.create({ from: null, to: user._id, amount: payment.amount * 100, type: 'payment' });
 
       await payment.save();
       return updatedUser;
