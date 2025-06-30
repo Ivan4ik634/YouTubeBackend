@@ -48,3 +48,45 @@ export class Statistick {
 }
 
 export const StatistickSchema = SchemaFactory.createForClass(Statistick);
+
+export type DayWalletDocument = HydratedDocument<DayWallet>;
+@Schema()
+export class DayWallet {
+  @Prop()
+  day: number;
+
+  @Prop({ required: true })
+  userId: string;
+
+  @Prop({ type: Number, default: 0 })
+  coins: number;
+}
+
+export const DayWalletSchema = SchemaFactory.createForClass(DayWallet);
+
+export type MonthWalletDocument = HydratedDocument<MonthWallet>;
+@Schema()
+export class MonthWallet {
+  @Prop()
+  month: string;
+
+  @Prop({ required: true })
+  userId: string;
+
+  @Prop({ type: [Types.ObjectId], ref: 'DayWallet', default: [] })
+  days: Types.ObjectId[];
+}
+
+export const MonthWalletSchema = SchemaFactory.createForClass(MonthWallet);
+
+export type StatistickWalletDocument = HydratedDocument<StatistickWallet>;
+@Schema()
+export class StatistickWallet {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'MonthWallet', required: true })
+  statistick: Types.ObjectId[];
+}
+
+export const StatistickWalletSchema = SchemaFactory.createForClass(StatistickWallet);

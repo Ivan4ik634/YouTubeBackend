@@ -12,4 +12,9 @@ export class StatistickController {
   async getStatistickVideo(@CurrectUser() userId: string, @Body() body: { id: string }) {
     return this.statistickService.getStatistickVideo(userId, body.id);
   }
+  @Post()
+  @UseGuards(AuthGuard)
+  async getStatistickWallet(@CurrectUser() userId: string) {
+    return this.statistickService.getStatistickWallet(userId);
+  }
 }

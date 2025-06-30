@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as dayjs from 'dayjs';
 import { Model } from 'mongoose';
-import { Day, Month, Statistick } from 'src/schemes/Statistick.schema';
+import { Day, DayWallet, Month, MonthWallet, Statistick, StatistickWallet } from 'src/schemes/Statistick.schema';
 
 @Injectable()
 export class StatistickService {
@@ -10,6 +10,9 @@ export class StatistickService {
     @InjectModel(Day.name) private day: Model<Day>,
     @InjectModel(Month.name) private month: Model<Month>,
     @InjectModel(Statistick.name) private statistick: Model<Statistick>,
+    @InjectModel(DayWallet.name) private dayWallet: Model<DayWallet>,
+    @InjectModel(MonthWallet.name) private monthWallet: Model<MonthWallet>,
+    @InjectModel(StatistickWallet.name) private statistickWallet: Model<StatistickWallet>,
   ) {}
 
   /**
@@ -59,7 +62,7 @@ export class StatistickService {
       },
     );
   }
-  async getStatistickVideo(userId:string,videoId: string) {
+  async getStatistickVideo(userId: string, videoId: string) {
     const statistick = await this.statistick
       .findOne({ video: videoId })
       .populate({ path: 'statistick', populate: { path: 'days' } });
@@ -70,5 +73,31 @@ export class StatistickService {
     await this.statistick.deleteOne({ video: videoId });
     await this.month.deleteMany({ videoId });
     await this.day.deleteMany({ videoId });
+  }
+  async createStatistick(userId: string) {
+    const today = dayjs();
+    const month = today.format('MM');
+    const daysInMonth = today.daysInMonth();
+    const days: number[] = [];
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+
+    await this.monthWallet.create({ month, userId, days: [] });
+    for (let i = 0; i < days.length; i++) {
+      const day = await this.dayWallet.create({ day: days[i], userId });
+
+      await this.monthWallet.updateOne({ month, userId }, { $push: { days: day._id } });
+    }
+    const monthUpdated = await this.monthWallet.findOne({ month, userId });
+    await this.statistickWallet.create({ user: userId, statistick: monthUpdated });
+  }
+  async getStatistickWallet(userId: string) {
+    const statistick = await this.statistickWallet
+      .findOne({ user: userId })
+      .populate({ path: 'statistickWallet', populate: { path: 'days' } });
+    if (!statistick) return 'Statistick not found';
+    return statistick;
   }
 }
