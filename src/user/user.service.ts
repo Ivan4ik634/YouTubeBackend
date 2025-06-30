@@ -9,6 +9,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { Setting } from 'src/schemes/Setting.schema';
 import { User } from 'src/schemes/User.schema';
 import { Video } from 'src/schemes/Video.schema';
+import { StatistickService } from 'src/statistick/statistick.service';
 import { TotpService } from 'src/totp/totp.service';
 import { editProfileDto, LoginDto, RegisterDto } from './dto/user';
 @Injectable()
@@ -19,6 +20,7 @@ export class UserService {
     @InjectModel(Setting.name)
     private setting: Model<Setting>,
     private readonly jwt: JwtService,
+    private readonly statistick: StatistickService,
     private readonly email: EmailService,
     private readonly notification: NotificationService,
     private readonly totp: TotpService,
@@ -38,6 +40,7 @@ export class UserService {
     const salt = await bcryptjs.genSalt(10);
     const hashed = await bcryptjs.hash(dto.password, salt);
     const newUser = await this.user.create({ ...dto, playerIds: dto.playerId, password: hashed });
+    await this.statistick.createStatistick(String(newUser._id));
     await this.setting.create({ userId: String(newUser._id) });
     const emailVerifyToken = await this.jwt.signAsync({ _id: newUser._id }, { secret: 'secret', expiresIn: '1h' });
     const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;

@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from 'src/schemes/User.schema';
 import { JwtService } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
 import { EmailModule } from 'src/email/email.module';
 import { Code, CodeSchema } from 'src/schemes/Code.schema';
-import { NotificationModule } from '../notification/notification.module';
-import { Subscribe, SubscribeSchema } from 'src/schemes/Subscribes.schema';
-import { TotpModule } from 'src/totp/totp.module';
-import { Video, VideoSchema } from 'src/schemes/Video.schema';
 import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
+import { Subscribe, SubscribeSchema } from 'src/schemes/Subscribes.schema';
+import { User, UserSchema } from 'src/schemes/User.schema';
+import { Video, VideoSchema } from 'src/schemes/Video.schema';
+import { StatistickModule } from 'src/statistick/statistick.module';
+import { TotpModule } from 'src/totp/totp.module';
+import { NotificationModule } from '../notification/notification.module';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
@@ -18,12 +19,11 @@ import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
     MongooseModule.forFeature([{ name: Code.name, schema: CodeSchema }]),
     MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
     MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
-    MongooseModule.forFeature([
-      { name: Subscribe.name, schema: SubscribeSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Subscribe.name, schema: SubscribeSchema }]),
     EmailModule,
     NotificationModule,
     TotpModule,
+    StatistickModule,
   ],
   controllers: [UserController],
   providers: [UserService, JwtService],
