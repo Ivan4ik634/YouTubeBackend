@@ -84,9 +84,9 @@ export class PaymentService {
   async moneyTransfer(body: { amount: number; userTransfer: string }, userId: string) {
     const user = await this.user.findById(userId);
     const userTransfer = await this.user.findOne({ username: body.userTransfer });
-
     if (!userTransfer) return 'User not found';
     if (!user) return 'User not found';
+    if (user.username === userTransfer.username) return "You can't send coins to yourself";
 
     if (user.balance >= body.amount) {
       const updatedUser = await this.user.findOneAndUpdate({ _id: user._id }, { balance: user.balance - body.amount });
