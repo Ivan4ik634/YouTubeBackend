@@ -49,32 +49,34 @@ export class PaymentService {
     return session; // редиректить сюда
   }
   async successPayment(body: { paymentId: string; transferId: string }, userId: string) {
-    const payment = await this.payment.findOne({ paymentId: body.paymentId });
-    const transfer = await this.transfer.findOne({ transferId: body.transferId });
-    if (transfer) return 'There is already such a transaction!';
-    if (!payment) return 'Payment not found';
-    if (payment.status === 'pending') {
-      const user = await this.user.findById(userId);
+    const existingTransfer = await this.transfer.findOne({ transferId: body.transferId });
+    if (existingTransfer) return 'There is already such a transaction!';
 
-      if (!user) return 'User not found';
-      if (String(user._id) !== payment.userId) return 'You can`t pay for yourself';
+    const payment = await this.payment.findOneAndUpdate(
+      { paymentId: body.paymentId, status: 'pending' },
+      { status: 'success' },
+    );
 
-      await this.payment.updateOne({ paymentId: body.paymentId }, { status: 'success' });
-      await payment.save();
-      await this.transfer.create({
-        from: null,
-        to: user._id,
-        transferId: body.transferId,
-        amount: payment.amount * 100,
-        type: 'payment',
-      });
-      const updatedUser = await this.user.findOneAndUpdate(
-        { _id: user._id },
-        { balance: user.balance + payment.amount * 100 },
-      );
-      return updatedUser;
-    }
+    if (!payment) return 'Payment not found or already processed';
+
+    if (String(payment.userId) !== userId) return 'You can`t pay for yourself';
+
+    const user = await this.user.findById(userId);
+    if (!user) return 'User not found';
+
+    await this.transfer.create({
+      from: null,
+      to: user._id,
+      transferId: body.transferId,
+      amount: payment.amount * 100,
+      type: 'payment',
+    });
+
+    await this.user.findOneAndUpdate({ _id: user._id }, { $inc: { balance: payment.amount * 100 } });
+
+    return { message: 'Payment processed successfully' };
   }
+
   async cancelPayment(paymentId: string, userId: string) {
     const payment = await this.payment.findOne({ paymentId: paymentId });
     if (!payment) return 'Payment not found';
