@@ -370,10 +370,13 @@ export class VideoService {
       console.error('Ошибка при отправке запроса:', error);
     }
   }
-  async payVideo(body: { videoId: string }, userId: string) {
+  async payVideo(body: { videoId: string; transferId: string }, userId: string) {
     const video = await this.video.findOne({ _id: body.videoId }).populate<{ userId: UserDto }>('userId');
     if (!video) return 'video not found';
-    await this.payment.moneyTransfer({ amount: video.price, userTransfer: video.userId._id }, userId);
+    await this.payment.moneyTransfer(
+      { amount: video.price, transferId: body.transferId, userTransfer: video.userId._id },
+      userId,
+    );
     await this.pushNotification.sendPushNotification(
       video.userId.playerIds,
       `Your video has been paid for`,

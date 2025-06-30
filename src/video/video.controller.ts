@@ -37,7 +37,7 @@ export class VideoController {
   }
   @Post('pay')
   @UseGuards(AuthGuard)
-  async payVideo(@Body() body: { videoId: string }, @CurrectUser() userId: string) {
+  async payVideo(@Body() body: { videoId: string; transferId: string }, @CurrectUser() userId: string) {
     return this.videoService.payVideo(body, userId);
   }
 
