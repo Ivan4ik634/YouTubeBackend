@@ -58,12 +58,9 @@ export class PaymentService {
 
       if (!user) return 'User not found';
       if (String(user._id) !== payment.userId) return 'You can`t pay for yourself';
-      const updatedUser = await this.user.findOneAndUpdate(
-        { _id: user._id },
-        { balance: user.balance + payment.amount * 100 },
-      );
 
       await this.payment.updateOne({ paymentId: body.paymentId }, { status: 'success' });
+      await payment.save();
       await this.transfer.create({
         from: null,
         to: user._id,
@@ -71,8 +68,10 @@ export class PaymentService {
         amount: payment.amount * 100,
         type: 'payment',
       });
-
-      await payment.save();
+      const updatedUser = await this.user.findOneAndUpdate(
+        { _id: user._id },
+        { balance: user.balance + payment.amount * 100 },
+      );
       return updatedUser;
     }
   }
