@@ -81,20 +81,29 @@ export class PaymentService {
       return 'Payment canceled!';
     }
   }
-  async moneyTransfer(body: { amount: number; userTransfer: string }, userId: string) {
+  async moneyTransfer(body: { amount: string; userTransfer: string }, userId: string) {
     const user = await this.user.findById(userId);
     const userTransfer = await this.user.findOne({ username: body.userTransfer });
     if (!userTransfer) return 'User not found';
     if (!user) return 'User not found';
     if (user.username === userTransfer.username) return "You can't send coins to yourself";
-
-    if (user.balance >= body.amount) {
-      const updatedUser = await this.user.findOneAndUpdate({ _id: user._id }, { balance: user.balance - body.amount });
-      const updatedUserTransfer = await this.user.findOneAndUpdate(
+    const amount = Number(body.amount);
+    if (user.balance >= amount) {
+      console.log({
+        userBalance: user.balance,
+        userTransferBalance: userTransfer.balance,
+        amount,
+        typeofUserBalance: typeof user.balance,
+        typeofUserTransferBalance: typeof userTransfer.balance,
+        typeofAmount: typeof amount,
+      });
+      const updatedUser = await this.user.findOneAndUpdate({ _id: user._id }, { balance: user.balance - amount });
+      await this.user.findOneAndUpdate(
         { _id: userTransfer._id },
-        { balance: userTransfer.balance + body.amount },
+        { balance: Number(userTransfer.balance) + Number(amount) },
       );
-      await this.transfer.create({ from: user._id, to: userTransfer._id, amount: body.amount, type: 'transfer' });
+
+      await this.transfer.create({ from: user._id, to: userTransfer._id, amount, type: 'transfer' });
       return 'The transfer was successful';
     }
   }
