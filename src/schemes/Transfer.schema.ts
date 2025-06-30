@@ -4,7 +4,7 @@ import { HydratedDocument } from 'mongoose';
 export type TransferDocument = HydratedDocument<Transfer>;
 @Schema()
 export class Transfer {
-  @Prop({ default:null })
+  @Prop({ default: null })
   from: string;
 
   @Prop({ required: true })
@@ -12,6 +12,9 @@ export class Transfer {
 
   @Prop({ required: true })
   amount: number;
+
+  @Prop({ required: true, unique: true })
+  transferId: string;
 
   @Prop({ required: true })
   type: 'payment' | 'transfer';

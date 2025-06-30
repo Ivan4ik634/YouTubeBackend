@@ -15,8 +15,8 @@ export class PaymentController {
   }
   @Post('success')
   @UseGuards(AuthGuard)
-  async successPayment(@CurrectUser() userId: string, @Body() body: { paymentId: string }) {
-    return this.paymentService.successPayment(body.paymentId, userId);
+  async successPayment(@CurrectUser() userId: string, @Body() body: { paymentId: string; transferId: string }) {
+    return this.paymentService.successPayment(body, userId);
   }
   @Post('cancel')
   @UseGuards(AuthGuard)
@@ -25,7 +25,10 @@ export class PaymentController {
   }
   @Post('transfer')
   @UseGuards(AuthGuard)
-  async moneyTransfer(@CurrectUser() userId: string, @Body() body: { amount: string | number; userTransfer: string }) {
+  async moneyTransfer(
+    @CurrectUser() userId: string,
+    @Body() body: { amount: string | number; userTransfer: string; transferId: string },
+  ) {
     return this.paymentService.moneyTransfer(body, userId);
   }
   @Get('transfer')

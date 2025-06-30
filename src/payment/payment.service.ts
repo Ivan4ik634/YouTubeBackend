@@ -48,8 +48,10 @@ export class PaymentService {
     await this.payment.create({ paymentId: session.id, status: 'pending', amount, userId: user._id });
     return session; // редиректить сюда
   }
-  async successPayment(paymentId: string, userId: string) {
-    const payment = await this.payment.findOne({ paymentId: paymentId });
+  async successPayment(body: { paymentId: string; transferId: string }, userId: string) {
+    const payment = await this.payment.findOne({ paymentId: body.paymentId });
+    const transfer = await this.transfer.findOne({ transferId: body.transferId });
+    if (transfer) return 'There is already such a transaction!';
     if (!payment) return 'Payment not found';
     if (payment.status === 'pending') {
       const user = await this.user.findById(userId);
@@ -61,8 +63,14 @@ export class PaymentService {
         { balance: user.balance + payment.amount * 100 },
       );
 
-      await this.payment.updateOne({ paymentId: paymentId }, { status: 'success' });
-      await this.transfer.create({ from: null, to: user._id, amount: payment.amount * 100, type: 'payment' });
+      await this.payment.updateOne({ paymentId: body.paymentId }, { status: 'success' });
+      await this.transfer.create({
+        from: null,
+        to: user._id,
+        transferId: body.transferId,
+        amount: payment.amount * 100,
+        type: 'payment',
+      });
 
       await payment.save();
       return updatedUser;
@@ -81,9 +89,11 @@ export class PaymentService {
       return 'Payment canceled!';
     }
   }
-  async moneyTransfer(body: { amount: string | number; userTransfer: string }, userId: string) {
+  async moneyTransfer(body: { amount: string | number; userTransfer: string; transferId: string }, userId: string) {
     const user = await this.user.findById(userId);
     const userTransfer = await this.user.findOne({ username: body.userTransfer });
+    const transfer = await this.transfer.findOne({ transferId: body.transferId });
+    if (transfer) return 'There is already such a transaction!';
     if (!userTransfer) return 'User not found';
     if (!user) return 'User not found';
     if (user.username === userTransfer.username) return "You can't send coins to yourself";
@@ -103,7 +113,13 @@ export class PaymentService {
         { balance: Number(userTransfer.balance) + Number(amount) },
       );
 
-      await this.transfer.create({ from: user._id, to: userTransfer._id, amount, type: 'transfer' });
+      await this.transfer.create({
+        from: user._id,
+        transferId: body.transferId,
+        to: userTransfer._id,
+        amount,
+        type: 'transfer',
+      });
       return 'The transfer was successful';
     }
   }
