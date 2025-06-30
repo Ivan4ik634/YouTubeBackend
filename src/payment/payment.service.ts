@@ -83,7 +83,7 @@ export class PaymentService {
   }
   async moneyTransfer(body: { amount: number; userTransfer: string }, userId: string) {
     const user = await this.user.findById(userId);
-    const userTransfer = await this.user.findById(body.userTransfer);
+    const userTransfer = await this.user.findOne({ username: body.userTransfer });
 
     if (!userTransfer) return 'User not found';
     if (!user) return 'User not found';
@@ -95,7 +95,7 @@ export class PaymentService {
         { balance: userTransfer.balance + body.amount },
       );
       await this.transfer.create({ from: user._id, to: userTransfer._id, amount: body.amount, type: 'transfer' });
-      return { updatedUser, updatedUserTransfer };
+      return 'The transfer was successful';
     }
   }
   async getTransfer(query: QueryFindAll, userId: string) {

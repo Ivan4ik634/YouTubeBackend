@@ -6,14 +6,12 @@ import { HistoryVideo } from 'src/schemes/HistoryVideo.schema';
 
 @Injectable()
 export class HistoryService {
-  constructor(
-    @InjectModel(HistoryVideo.name) private history: Model<HistoryVideo>,
-  ) {}
+  constructor(@InjectModel(HistoryVideo.name) private history: Model<HistoryVideo>) {}
   async findAll(query: QueryFindAll, userId: string) {
     const skip = (query.page - 1) * query.limit;
     const history = await this.history
       .find({ userId: userId })
-      .populate('videoId')
+      .populate({ path: 'videoId', populate: { path: 'userId' } })
       .limit(query.limit)
       .skip(skip);
     console.log(history);

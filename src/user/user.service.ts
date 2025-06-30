@@ -144,6 +144,8 @@ export class UserService {
   }
   async profileUserName(userName: string) {
     const profile = await this.user.findOne({ username: userName });
+    if (!profile) return 'User not defined';
+
     return profile;
   }
   async subscribeProfile(userId: string, dto: string) {

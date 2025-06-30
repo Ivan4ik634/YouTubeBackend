@@ -122,7 +122,8 @@ export class VideoService {
     if (video.isHidden && !isAutor) return 'Video not found';
     if (video?.userId.isVisibilityVideo === 'noting' && !isAutor) return 'Video not found';
     if (video.isBlocked === true) return 'Video not found';
-    if (!video.purchasedBy.some((obj) => obj.toString() === payload._id) && !isAutor) return 'Video not found';
+    if (video.price !== 0)
+      if (!video.purchasedBy.some((obj) => obj.toString() === payload._id) && !isAutor) return 'Video not found';
 
     if (bearer) {
       const historyVideo = await this.historyVideo.findOne({
