@@ -25,7 +25,7 @@ export class PaymentController {
   }
   @Post('transfer')
   @UseGuards(AuthGuard)
-  async moneyTransfer(@CurrectUser() userId: string, @Body() body: { amount: number; userTransfer: string }) {
+  async moneyTransfer(@CurrectUser() userId: string, @Body() body: { amount: string | number; userTransfer: string }) {
     return this.paymentService.moneyTransfer(body, userId);
   }
   @Get('transfer')

@@ -81,7 +81,7 @@ export class PaymentService {
       return 'Payment canceled!';
     }
   }
-  async moneyTransfer(body: { amount: string; userTransfer: string }, userId: string) {
+  async moneyTransfer(body: { amount: string | number; userTransfer: string }, userId: string) {
     const user = await this.user.findById(userId);
     const userTransfer = await this.user.findOne({ username: body.userTransfer });
     if (!userTransfer) return 'User not found';
