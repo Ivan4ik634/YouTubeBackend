@@ -23,7 +23,7 @@ export class Video {
   @Prop({ type: String, required: true })
   description: string;
 
-  @Prop({ type: Number, default: 0 })
+  @Prop({ type: Number, required: true })
   price: number;
 
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
