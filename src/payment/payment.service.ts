@@ -5,6 +5,7 @@ import { QueryFindAll } from 'src/common/dto/queryFindAll';
 import { Payment } from 'src/schemes/Payment.schema';
 import { Transfer } from 'src/schemes/Transfer.schema';
 import { User } from 'src/schemes/User.schema';
+import { StatistickService } from 'src/statistick/statistick.service';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class PaymentService {
     @InjectModel(Payment.name) private payment: Model<Payment>,
     @InjectModel(User.name) private user: Model<User>,
     @InjectModel(Transfer.name) private transfer: Model<Transfer>,
+    private readonly statistick: StatistickService,
   ) {
     this.stripe = new Stripe(process.env.STRAPI_API_KEY!);
   }
@@ -71,7 +73,7 @@ export class PaymentService {
       amount: payment.amount * 100,
       type: 'payment',
     });
-
+    await this.statistick.editStatistickWallet(String(user._id), payment.amount * 100);
     await this.user.findOneAndUpdate({ _id: user._id }, { $inc: { balance: payment.amount * 100 } });
 
     return { message: 'Payment processed successfully' };
@@ -121,6 +123,11 @@ export class PaymentService {
         amount,
         type: 'transfer',
       });
+      await this.statistick.editStatistickWallet(String(user._id), user.balance - amount);
+      await this.statistick.editStatistickWallet(
+        String(userTransfer._id),
+        Number(userTransfer.balance) + Number(amount),
+      );
       return { ...transfer, message: 'The transfer was successful' };
     }
   }

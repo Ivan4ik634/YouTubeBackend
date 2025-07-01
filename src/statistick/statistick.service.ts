@@ -74,6 +74,10 @@ export class StatistickService {
     await this.month.deleteMany({ videoId });
     await this.day.deleteMany({ videoId });
   }
+  async editStatistickWallet(userId: string, amount: number) {
+    const today = dayjs();
+    const day = await this.dayWallet.findOneAndUpdate({ userId, day: today.date() }, { $inc: { coins: amount } });
+  }
   async createStatistick(userId: string) {
     const today = dayjs();
     const month = today.format('MM');
