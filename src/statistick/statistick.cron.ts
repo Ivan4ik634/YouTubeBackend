@@ -35,7 +35,7 @@ export class StatistickCron {
     for (let i = 0; i < videos.length; i++) {
       await this.month.create({ month, videoId: String(videos[i]._id), days: [] });
       for (let i = 0; i < days.length; i++) {
-        const day = await this.day.create({ day: days[i], videoId: String(videos[i]._id) });
+        const day = await this.day.create({ month, day: days[i], videoId: String(videos[i]._id) });
 
         await this.month.updateOne({ month, videoId: String(videos[i]._id) }, { $push: { days: day._id } });
       }
@@ -45,7 +45,7 @@ export class StatistickCron {
     for (let i = 0; i < users.length; i++) {
       await this.monthWallet.create({ month, userId: String(users[i]._id), days: [] });
       for (let i = 0; i < days.length; i++) {
-        const day = await this.dayWallet.create({ day: days[i], userId: String(users[i]._id) });
+        const day = await this.dayWallet.create({ month, day: days[i], userId: String(users[i]._id) });
 
         await this.monthWallet.updateOne({ month, userId: String(users[i]._id) }, { $push: { days: day._id } });
       }

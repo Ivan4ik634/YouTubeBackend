@@ -35,7 +35,7 @@ export class StatistickService {
 
     await this.month.create({ month, videoId, days: [] });
     for (let i = 0; i < days.length; i++) {
-      const day = await this.day.create({ day: days[i], videoId });
+      const day = await this.day.create({ month, day: days[i], videoId });
 
       await this.month.updateOne({ month, videoId }, { $push: { days: day._id } });
     }
@@ -52,7 +52,7 @@ export class StatistickService {
   async editStatistickVideo(videoId: string, likes: number, views: number, comments: number) {
     const today = dayjs();
     const day = await this.day.findOneAndUpdate(
-      { videoId, day: today.date() },
+      { month: today.format('MM'), videoId, day: today.date() },
       {
         $inc: {
           views: views,
@@ -76,7 +76,10 @@ export class StatistickService {
   }
   async editStatistickWallet(userId: string, amount: number) {
     const today = dayjs();
-    const day = await this.dayWallet.findOneAndUpdate({ userId, day: today.date() }, { $inc: { coins: amount } });
+    const day = await this.dayWallet.findOneAndUpdate(
+      { month: today.format('MM'), userId, day: today.date() },
+      { $inc: { coins: amount } },
+    );
   }
   async createStatistick(userId: string) {
     const today = dayjs();
@@ -90,7 +93,7 @@ export class StatistickService {
 
     await this.monthWallet.create({ month, userId, days: [] });
     for (let i = 0; i < days.length; i++) {
-      const day = await this.dayWallet.create({ day: days[i], userId });
+      const day = await this.dayWallet.create({ month, day: days[i], userId });
 
       await this.monthWallet.updateOne({ month, userId }, { $push: { days: day._id } });
     }

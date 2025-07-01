@@ -8,6 +8,9 @@ export class Day {
   day: number;
 
   @Prop()
+  month: string;
+
+  @Prop()
   videoId: string;
 
   @Prop({ type: Number, default: 0 })
@@ -54,6 +57,9 @@ export type DayWalletDocument = HydratedDocument<DayWallet>;
 export class DayWallet {
   @Prop()
   day: number;
+
+  @Prop()
+  month: string;
 
   @Prop({ required: true })
   userId: string;
