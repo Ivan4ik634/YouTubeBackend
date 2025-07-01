@@ -116,15 +116,7 @@ export class VideoService {
     const video = await this.video.findOne({ _id: id }).populate<{ userId: User & { _id: string } }>('userId');
     const payload: { _id: string } = bearer ? await this.jwt.verify(bearer, { secret: 'secret' }) : { _id: '' };
     const isAutor = payload._id === video?.userId._id.toString();
-
     if (!video) return 'Video not found';
-    if (video.userId.hidden && !isAutor) return 'Video not found';
-    if (video.isHidden && !isAutor) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting' && !isAutor) return 'Video not found';
-    if (video.isBlocked === true) return 'Video not found';
-    if (video.price !== 0)
-      if (!video.purchasedBy.some((obj) => obj.toString() === payload._id) && !isAutor) return 'Video not found';
-
     if (bearer) {
       const historyVideo = await this.historyVideo.findOne({
         userId: payload._id,
@@ -134,10 +126,16 @@ export class VideoService {
         if (payload) await this.historyVideo.create({ userId: payload._id, videoId: id });
       }
     }
-
     await this.video.updateOne({ _id: id }, { $inc: { views: 1 } });
     await this.statistick.editStatistickVideo(String(video._id), 0, 1, 0);
     await video.save();
+    if (isAutor) return video;
+    if (video.userId.hidden) return 'Video not found';
+    if (video.isHidden) return 'Video not found';
+    if (video?.userId.isVisibilityVideo === 'noting') return 'Video not found';
+    if (video.isBlocked === true) return 'Video not found';
+    if (video.price > 0 && !video.purchasedBy.some((obj) => obj.toString() === payload._id))
+      return { price: video.price };
 
     return video;
   }
@@ -373,15 +371,21 @@ export class VideoService {
   async payVideo(body: { videoId: string; transferId: string }, userId: string) {
     const video = await this.video.findOne({ _id: body.videoId }).populate<{ userId: UserDto }>('userId');
     if (!video) return 'video not found';
+    if (video.purchasedBy.some((obj) => String(obj) === userId)) {
+      return 'The video has already been paid for, please reload the page';
+    }
     await this.payment.moneyTransfer(
       { amount: video.price, transferId: body.transferId, userTransfer: video.userId._id },
       userId,
     );
+
+    await this.video.updateOne({ _id: body.videoId }, { $push: { purchasedBy: userId } });
     await this.pushNotification.sendPushNotification(
       video.userId.playerIds,
       `Your video has been paid for`,
       `Video name : ${video.title} , price: ${video.price}MN `,
       `https://white-youtube.vercel.app/wallet`,
     );
+    return 'Video payment!';
   }
 }
