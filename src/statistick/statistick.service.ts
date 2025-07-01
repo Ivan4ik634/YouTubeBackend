@@ -100,7 +100,7 @@ export class StatistickService {
   async getStatistickWallet(userId: string) {
     const statistick = await this.statistickWallet
       .findOne({ user: userId })
-      .populate({ path: 'statistickWallet', populate: { path: 'days' } });
+      .populate({ path: 'statistick', populate: { path: 'days' } });
     if (!statistick) return 'Statistick not found';
     return statistick;
   }
