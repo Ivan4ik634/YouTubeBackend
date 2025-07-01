@@ -135,7 +135,7 @@ export class VideoService {
     if (video?.userId.isVisibilityVideo === 'noting') return 'Video not found';
     if (video.isBlocked === true) return 'Video not found';
     if (video.price > 0 && !video.purchasedBy.some((obj) => obj.toString() === payload._id))
-      return { price: video.price };
+      return { purchasedBy: video.purchasedBy, userId: video.userId, price: video.price };
 
     return video;
   }
