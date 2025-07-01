@@ -123,11 +123,8 @@ export class PaymentService {
         amount,
         type: 'transfer',
       });
-      await this.statistick.editStatistickWallet(String(user._id), user.balance - amount);
-      await this.statistick.editStatistickWallet(
-        String(userTransfer._id),
-        Number(userTransfer.balance) + Number(amount),
-      );
+      await this.statistick.editStatistickWallet(String(user._id), -Number(amount));
+      await this.statistick.editStatistickWallet(String(userTransfer._id), Number(amount));
       return { ...transfer, message: 'The transfer was successful' };
     }
   }
