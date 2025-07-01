@@ -6,12 +6,14 @@ import { Transfer, TransferSchema } from 'src/schemes/Transfer.schema';
 import { UserSchema } from 'src/schemes/User.schema';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
+import { StatistickModule } from 'src/statistick/statistick.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Payment', schema: PaymentSchema }]),
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Transfer.name, schema: TransferSchema }]),
+    StatistickModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService, JwtService],
