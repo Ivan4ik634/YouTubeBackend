@@ -103,14 +103,13 @@ export class VideoService {
       })
       .skip(skip)
       .limit(limit)
+      .select('-video') // ⬅️ исключаем поле video
       .populate<{ userId: User }>('userId');
-    console.log(videos);
+
     return videos.length !== 0
-      ? videos
-          .filter((obj) => {
-            return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
-          })
-          .map(({ video, ...rest }) => rest)
+      ? videos.filter((obj) => {
+          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
+        })
       : [];
   }
 
