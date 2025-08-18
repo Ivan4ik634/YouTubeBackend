@@ -106,9 +106,11 @@ export class VideoService {
       .populate<{ userId: User }>('userId');
     console.log(videos);
     return videos.length !== 0
-      ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
-        })
+      ? videos
+          .filter((obj) => {
+            return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
+          })
+          .map(({ video, ...rest }) => rest)
       : [];
   }
 
