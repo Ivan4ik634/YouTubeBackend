@@ -66,7 +66,7 @@ export class VideoService {
     const page = query.page || 1;
     const skip = (page - 1) * limit;
     const videos = (await this.video
-      .find({ userId, likes: user._id })
+      .find({ likes: [user._id] })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -136,7 +136,7 @@ export class VideoService {
     if (video?.userId.isVisibilityVideo === 'noting') return 'Video not found';
     if (video.isBlocked === true) return 'Video not found';
     if (video.price > 0 && !video.purchasedBy.some((obj) => obj.toString() === payload._id))
-      return { purchasedBy: video.purchasedBy, userId: video.userId, price: video.price };
+      return { purchasedBy: video.purchasedBy, videoId: video._id, userId: video.userId, price: video.price };
 
     return video;
   }
