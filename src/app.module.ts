@@ -5,7 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CommentModule } from './comment/comment.module';
 import { HistoryModule } from './history/history.module';
 import { NotificationModule } from './notification/notification.module';
-import { PassModule } from './pass/pass.module';
 import { PaymentModule } from './payment/payment.module';
 import { PingModule } from './ping/ping.module';
 import { PlaylistModule } from './playlist/playlist.module';
@@ -32,7 +31,6 @@ import { VideoModule } from './video/video.module';
     VideoModule,
     UploadModule,
     HistoryModule,
-    PassModule,
     PlaylistModule,
     NotificationModule,
     CommentModule,
