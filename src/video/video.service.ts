@@ -108,7 +108,7 @@ export class VideoService {
 
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
+          return obj.userId.hidden === false && obj.userId.isVisibilityVideo === 'all' && obj.isBlocked === false;
         })
       : [];
   }
@@ -130,11 +130,15 @@ export class VideoService {
     await this.video.updateOne({ _id: id }, { $inc: { views: 1 } });
     await this.statistick.editStatistickVideo(String(video._id), 0, 1, 0);
     await video.save();
+
     if (isAutor) return video;
-    if (video.userId.hidden) return 'Video not found';
-    if (video.isHidden) return 'Video not found';
-    if (video?.userId.isVisibilityVideo === 'noting') return 'Video not found';
-    if (video.isBlocked === true) return 'Video not found';
+    if (
+      video.userId.hidden ||
+      video.isHidden ||
+      video?.userId.isVisibilityVideo === 'noting' ||
+      video.isBlocked === true
+    )
+      return 'Video not found';
     if (video.price > 0 && !video.purchasedBy.some((obj) => obj.toString() === payload._id))
       return { purchasedBy: video.purchasedBy, videoId: video._id, userId: video.userId, price: video.price };
 
