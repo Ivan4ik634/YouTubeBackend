@@ -199,8 +199,8 @@ export class VideoService {
       .limit(5)
       .populate<{ userId: User }>('userId');
     return videos.length !== 0
-      ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
+      ?videos.filter((obj) => {
+          return obj.userId.hidden === false && obj.userId.isVisibilityVideo === 'all' && obj.isBlocked === false;
         })
       : [];
   }
