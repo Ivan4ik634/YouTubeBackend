@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcryptjs from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 import { QueryFindAll } from 'src/common/dto/queryFindAll';
-import { EmailService } from 'src/email/email.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { Setting } from 'src/schemes/Setting.schema';
 import { User } from 'src/schemes/User.schema';
@@ -21,7 +20,6 @@ export class UserService {
     private setting: Model<Setting>,
     private readonly jwt: JwtService,
     private readonly statistick: StatistickService,
-    private readonly email: EmailService,
     private readonly notification: NotificationService,
     private readonly totp: TotpService,
   ) {}
@@ -40,14 +38,13 @@ export class UserService {
     const salt = await bcryptjs.genSalt(10);
     const hashed = await bcryptjs.hash(dto.password, salt);
     const newUser = await this.user.create({ ...dto, playerIds: dto.playerId, password: hashed });
+
     await this.statistick.createStatistick(String(newUser._id));
     await this.setting.create({ userId: String(newUser._id) });
-    const emailVerifyToken = await this.jwt.signAsync({ _id: newUser._id }, { secret: 'secret', expiresIn: '1h' });
-    const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
-    const textEmail = `Thank you for registering! To activate your account, confirm your email using this link ${link}`;
-    await this.email.sendEmail(newUser.email, 'Mail confirmation', textEmail, textEmail);
 
-    return { message: 'A letter has appeared in the mail, check it!' };
+    const refreshToken = await this.jwt.signAsync({ _id: newUser._id }, { secret: 'secret', expiresIn: '30d' });
+
+    return { refreshToken };
   }
   async login(dto: LoginDto) {
     const userEmail = await this.user.findOne({ email: dto.username });
@@ -62,13 +59,11 @@ export class UserService {
             return { message: 'Invalid TOTP code' };
         }
 
-        const emailVerifyToken = await this.jwt.signAsync(
+        const refreshToken = await this.jwt.signAsync(
           { _id: userUserName._id },
-          { secret: 'secret', expiresIn: '1h' },
+          { secret: 'secret', expiresIn: '30d' },
         );
-        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
-        const textEmail = `Thank you for returning to our platform! To activate your account, confirm your email using this link ${link}`;
-        await this.email.sendEmail(userUserName.email, 'Mail confirmation', textEmail, textEmail);
+
         const userPlayerId = await this.user.findOne({ _id: userUserName._id, playerIds: dto.playerId });
         if (!userPlayerId) {
           await this.user.updateOne(
@@ -78,7 +73,7 @@ export class UserService {
             { $push: { playerIds: dto.playerId } },
           );
         }
-        return { message: 'A letter has appeared in the mail, check it!' };
+        return { refreshToken };
       }
     }
     if (userEmail && !userUserName) {
@@ -90,14 +85,9 @@ export class UserService {
             return { message: 'Invalid TOTP code' };
         }
 
-        const emailVerifyToken = await this.jwt.signAsync(
-          { _id: userEmail._id },
-          { secret: 'secret', expiresIn: '1h' },
-        );
-        const link = `<a href=https://white-youtube.vercel.app/verify?token=${emailVerifyToken}>Will confirm mail</a>`;
-        const textEmail = `Thank you for returning to our platform! To activate your account, confirm your email using this link ${link}`;
-        await this.email.sendEmail(userEmail.email, 'Mail confirmation', textEmail, textEmail);
+        const refreshToken = await this.jwt.signAsync({ _id: userEmail._id }, { secret: 'secret', expiresIn: '30d' });
         const userPlayerId = await this.user.findOne({ _id: userEmail._id, playerIds: dto.playerId });
+
         if (!userPlayerId) {
           await this.user.updateOne(
             {
@@ -106,20 +96,11 @@ export class UserService {
             { $push: { playerIds: dto.playerId } },
           );
         }
-        return { message: 'A letter has appeared in the mail, check it!' };
+        return { refreshToken };
       }
     }
 
     return { message: 'Incorrect login or password' };
-  }
-
-  async verifyEmail(token: string) {
-    const user = await this.jwt.verify(token, { secret: 'secret' });
-    const userVerify = await this.user.findById(user._id);
-    if (!userVerify) return { message: 'Такого пользователя не существует' };
-    const refreshToken = await this.jwt.signAsync({ _id: user._id }, { secret: 'secret', expiresIn: '30d' });
-    const accetsToken = await this.jwt.signAsync({ _id: user._id }, { secret: 'secret', expiresIn: '1h' });
-    return { refreshToken, accetsToken };
   }
 
   async editProfile(userId: string, dto: editProfileDto) {

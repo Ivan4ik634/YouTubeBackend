@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EmailModule } from 'src/email/email.module';
 import { Code, CodeSchema } from 'src/schemes/Code.schema';
 import { Setting, SettingSchema } from 'src/schemes/Setting.schema';
 import { Subscribe, SubscribeSchema } from 'src/schemes/Subscribes.schema';
@@ -20,7 +19,6 @@ import { UserService } from './user.service';
     MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
     MongooseModule.forFeature([{ name: Setting.name, schema: SettingSchema }]),
     MongooseModule.forFeature([{ name: Subscribe.name, schema: SubscribeSchema }]),
-    EmailModule,
     NotificationModule,
     TotpModule,
     StatistickModule,

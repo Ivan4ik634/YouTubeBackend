@@ -3,20 +3,19 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CommentModule } from './comment/comment.module';
-import { EmailModule } from './email/email.module';
 import { HistoryModule } from './history/history.module';
 import { NotificationModule } from './notification/notification.module';
 import { PassModule } from './pass/pass.module';
+import { PaymentModule } from './payment/payment.module';
 import { PingModule } from './ping/ping.module';
 import { PlaylistModule } from './playlist/playlist.module';
+import { PushNotificationModule } from './push-notification/push-notification.module';
 import { SettingModule } from './setting/setting.module';
 import { StatistickModule } from './statistick/statistick.module';
 import { TotpModule } from './totp/totp.module';
 import { UploadModule } from './upload/upload.module';
 import { UserModule } from './user/user.module';
 import { VideoModule } from './video/video.module';
-import { PushNotificationModule } from './push-notification/push-notification.module';
-import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { PaymentModule } from './payment/payment.module';
 
     UserModule,
     VideoModule,
-    EmailModule,
     UploadModule,
     HistoryModule,
     PassModule,
