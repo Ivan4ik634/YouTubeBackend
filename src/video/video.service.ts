@@ -54,7 +54,7 @@ export class VideoService {
     console.log(videos);
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false || obj.userId.isVisibilityVideo === 'all' || obj.isBlocked === false;
+          return !obj.userId.hidden && obj.userId.isVisibilityVideo === 'public' && !obj.isBlocked;
         })
       : [];
   }
@@ -108,7 +108,7 @@ export class VideoService {
 
     return videos.length !== 0
       ? videos.filter((obj) => {
-          return obj.userId.hidden === false && obj.userId.isVisibilityVideo === 'all' && obj.isBlocked === false;
+          return !obj.userId.hidden && obj.userId.isVisibilityVideo === 'public' && !obj.isBlocked;
         })
       : [];
   }
@@ -135,7 +135,7 @@ export class VideoService {
     if (
       video.userId.hidden ||
       video.isHidden ||
-      video?.userId.isVisibilityVideo === 'noting' ||
+      video?.userId.isVisibilityVideo === 'private' ||
       video.isBlocked === true
     )
       return 'Video not found';
@@ -199,8 +199,8 @@ export class VideoService {
       .limit(5)
       .populate<{ userId: User }>('userId');
     return videos.length !== 0
-      ?videos.filter((obj) => {
-          return obj.userId.hidden === false && obj.userId.isVisibilityVideo === 'all' && obj.isBlocked === false;
+      ? videos.filter((obj) => {
+          return !obj.userId.hidden && obj.userId.isVisibilityVideo === 'public' && !obj.isBlocked;
         })
       : [];
   }
@@ -380,7 +380,7 @@ export class VideoService {
       return 'The video has already been paid for, please reload the page';
     }
     await this.payment.moneyTransfer(
-      { amount: video.price, transferId: body.transferId, userTransfer: video.userId._id },
+      { amount: video.price, transferId: body.transferId, userTransfer: video.userId.username },
       userId,
     );
 

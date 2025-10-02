@@ -96,20 +96,14 @@ export class PaymentService {
     const user = await this.user.findById(userId);
     const userTransfer = await this.user.findOne({ username: body.userTransfer });
     const transfer = await this.transfer.findOne({ transferId: body.transferId });
+
     if (transfer) return { message: 'There is already such a transaction!' };
-    if (!userTransfer) return { message: 'User not found' };
-    if (!user) return { message: 'User not found' };
+    if (!userTransfer || !user) return { message: 'User not found' };
     if (user.username === userTransfer.username) return { message: "You can't send coins to yourself" };
+
     const amount = Number(body.amount);
+
     if (user.balance >= amount) {
-      console.log({
-        userBalance: user.balance,
-        userTransferBalance: userTransfer.balance,
-        amount,
-        typeofUserBalance: typeof user.balance,
-        typeofUserTransferBalance: typeof userTransfer.balance,
-        typeofAmount: typeof amount,
-      });
       const updatedUser = await this.user.findOneAndUpdate({ _id: user._id }, { balance: user.balance - amount });
       await this.user.findOneAndUpdate(
         { _id: userTransfer._id },

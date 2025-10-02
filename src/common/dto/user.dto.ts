@@ -1,6 +1,6 @@
 export class UserDto {
   _id: string;
-  userName: string;
+  username: string;
   email: string;
   password: string;
   blocedUsers: string[];
